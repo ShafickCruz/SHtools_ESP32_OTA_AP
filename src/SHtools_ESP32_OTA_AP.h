@@ -6,6 +6,7 @@
 #include <ElegantOTA.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <pgmspace.h> // para utilizar PROGMEM
 
 class SHtools_ESP32_OTA_AP
 {
@@ -29,7 +30,8 @@ private:
     int buttonPin;
     String nomeSketch;
     unsigned long ota_progress_millis;
-    AsyncWebServer server; // Declaração do servidor como membro da classe
+    AsyncWebServer server;                        // Declaração do servidor como membro da classe
+    static const char controlPanelHTML[] PROGMEM; // Declaração da página HTML
 
     String style;
     String loginIndex;
@@ -40,7 +42,6 @@ private:
     void onOTAStart();
     void onOTAProgress(size_t current, size_t final);
     void onOTAEnd(bool success);
-
     void startServerMode(); // Inicia o servidor AP
     void WifiSetup();
     String generateSSID(); // Gera SSID

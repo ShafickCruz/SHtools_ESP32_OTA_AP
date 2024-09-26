@@ -1,5 +1,29 @@
 #include "SHtools_ESP32_OTA_AP.h"
 
+// pagina HTML do index
+const char SHtools_ESP32_OTA_AP::controlPanelHTML[] PROGMEM =
+    "<!DOCTYPE html>"
+    "<html lang='en'>"
+    "<head>"
+    "<meta charset='UTF-8'>"
+    "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+    "<title>ESP32 Control Panel</title>"
+    "<style>"
+    "body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f0f0; margin-top: 50px; }"
+    "h1 { color: #333; }"
+    ".button { display: inline-block; padding: 15px 25px; font-size: 18px; margin: 10px; cursor: pointer; "
+    "border: none; border-radius: 5px; background-color: #007bff; color: white; text-decoration: none; }"
+    ".button:hover { background-color: #0056b3; }"
+    "</style>"
+    "</head>"
+    "<body>"
+    "<h1>ESP32 Control Panel</h1>"
+    "<a href='/update' class='button'>Update OTA</a><br>"
+    "<button class='button' onclick=\"alert('TODO: Serial Monitor page')\">Serial Monitor</button><br>"
+    "<button class='button' onclick=\"alert('TODO: Info page')\">Informações</button>"
+    "</body>"
+    "</html>";
+
 SHtools_ESP32_OTA_AP::SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch)
     : ServerMode(false), buttonPressTime(0), lastButtonStateChangeTime(0), longPressDuration(3000),
       debounceDelay(50), lastButtonState(HIGH), ledPin(ledPin), buttonPin(buttonPin),
@@ -81,7 +105,7 @@ void SHtools_ESP32_OTA_AP::startServerMode()
     ServerMode = true;
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(200, "text/plain", "Hi! This is ElegantOTA AsyncDemo."); });
+              { request->send(200, "text/plain", controlPanelHTML); });
 
     ElegantOTA.begin(&server); // Start ElegantOTA
 
