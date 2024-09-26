@@ -1,6 +1,6 @@
 {
     "name": "SHtools_ESP32_OTA_AP",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "author": "Shafick Cruz",
     "maintainer": "Shafick Cruz <shafick@outlook.com.br>",
     "sentence": "Uma biblioteca para gerenciar atualizações OTA de forma assíncrona em modo AP no ESP32.",
@@ -24,6 +24,7 @@
     "website": "https://github.com/ShafickCruz/SHtools_ESP32_OTA_AP",
     "issues": "https://github.com/ShafickCruz/SHtools_ESP32_OTA_AP/issues",
     "dependencies": {
-        "ayushsharma82/ElegantOTA": "^3.1.5"
+        "ayushsharma82/ElegantOTA": "^3.1.5",
+        "ayushsharma82/WebSerial": "^2.0.7"
     }
 }
