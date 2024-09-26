@@ -1,6 +1,6 @@
 {
     "name": "SHtools_ESP32_OTA_AP",
-    "version": "2.0.1\"  ; definir a vers\u00c3\u00a3o do projeto",
+    "version": "2.0.2\"  ; definir a vers\u00c3\u00a3o do projeto",
     "author": "Shafick Cruz",
     "maintainer": "Shafick Cruz <shafick@outlook.com.br>",
     "sentence": "Uma biblioteca para gerenciar atualiza\u00c3\u00a7\u00c3\u00b5es OTA de forma ass\u00c3\u00adncrona em modo AP no ESP32.",
