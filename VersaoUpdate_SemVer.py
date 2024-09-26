@@ -11,7 +11,7 @@ version = config['env:esp32doit-devkit-v1']['build_flags']
 version_macro = [flag for flag in version.split('\n') if 'VERSION_MACRO' in flag]
 
 if version_macro:
-    version = version_macro[0].split('=')[1].strip().strip('"')
+    version = version_macro[0].split('=')[1].strip().strip('"')  # Pega o valor entre aspas
 
 # Atualizar library.json
 if os.path.exists('library.json'):
