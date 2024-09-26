@@ -105,7 +105,7 @@ void SHtools_ESP32_OTA_AP::startServerMode()
     ServerMode = true;
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(200, "text/plain", IndexHTML); });
+              { request->send(200, "text/plain", "use IP/update"); });
 
     ElegantOTA.begin(&server); // Start ElegantOTA
 
