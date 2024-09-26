@@ -1,5 +1,6 @@
 #include "SHtools_ESP32_OTA_AP.h"
 
+/*
 // pagina HTML do index
 const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM =
     "<!DOCTYPE html>"
@@ -23,6 +24,7 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM =
     "<button class='button' onclick=\"alert('TODO: Info page')\">Informações</button>"
     "</body>"
     "</html>";
+*/
 
 SHtools_ESP32_OTA_AP::SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch)
     : ServerMode(false), buttonPressTime(0), lastButtonStateChangeTime(0), longPressDuration(3000),
