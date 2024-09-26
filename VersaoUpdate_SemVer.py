@@ -22,7 +22,7 @@ if version:
             data = json.load(f)
             data['version'] = version
             f.seek(0)
-            json.dump(data, f, indent=4)
+            json.dump(data, f, indent=4, ensure_ascii=False)
             f.truncate()
 
     # Atualizar library.properties

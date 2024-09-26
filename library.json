@@ -1,10 +1,10 @@
 {
     "name": "SHtools_ESP32_OTA_AP",
-    "version": "2.0.2",
+    "version": "2.0.1",
     "author": "Shafick Cruz",
     "maintainer": "Shafick Cruz <shafick@outlook.com.br>",
-    "sentence": "Uma biblioteca para gerenciar atualiza\u00c3\u00a7\u00c3\u00b5es OTA de forma ass\u00c3\u00adncrona em modo AP no ESP32.",
-    "paragraph": "Esta biblioteca facilita o gerenciamento de atualiza\u00c3\u00a7\u00c3\u00b5es OTA no ESP32. Inclui suporte para modo access point e webserver ass\u00c3\u00adncrono. Pode ser integrada facilmente em projetos baseados em ESP32.",
+    "sentence": "Uma biblioteca para gerenciar atualizações OTA de forma assíncrona em modo AP no ESP32.",
+    "paragraph": "Esta biblioteca facilita o gerenciamento de atualizações OTA no ESP32. Inclui suporte para modo access point e webserver assíncrono. Pode ser integrada facilmente em projetos baseados em ESP32.",
     "category": "Communication",
     "keywords": [
         "OTA",
