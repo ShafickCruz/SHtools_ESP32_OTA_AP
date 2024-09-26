@@ -167,10 +167,10 @@ void SHtools_ESP32_OTA_AP::WifiSetup()
     }
 
     // Configura o servidor AP
-    IPAddress local_ip(192, 168, 253, 254);
+    IPAddress local_ip(192, 168, 100, 100);
     IPAddress local_mask(255, 255, 255, 0);
-    IPAddress gateway(192, 168, 253, 253);
-    String ssid = "192.168.253.253 -> " + generateSSID(); // Gera o SSID com identificador único
+    IPAddress gateway(192, 168, 100, 1);
+    String ssid = "192.168.100.100 -> " + generateSSID(); // Gera o SSID com identificador único
 
     // Aguarda a inicialização do servidor wifi
     Serial.println("inicializando webserver.");
