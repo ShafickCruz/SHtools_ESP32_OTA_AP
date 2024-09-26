@@ -1,16 +1,29 @@
 {
     "name": "SHtools_ESP32_OTA_AP",
-    "version": "2.0.0",
+    "version": "2.0.1\"  ; definir a vers\u00c3\u00a3o do projeto",
     "author": "Shafick Cruz",
     "maintainer": "Shafick Cruz <shafick@outlook.com.br>",
-    "sentence": "Uma biblioteca para gerenciar atualizações OTA de forma assíncrona em modo AP no ESP32.",
-    "paragraph": "Esta biblioteca facilita o gerenciamento de atualizações OTA no ESP32. Inclui suporte para modo access point e webserver assíncrono. Pode ser integrada facilmente em projetos baseados em ESP32.",
+    "sentence": "Uma biblioteca para gerenciar atualiza\u00c3\u00a7\u00c3\u00b5es OTA de forma ass\u00c3\u00adncrona em modo AP no ESP32.",
+    "paragraph": "Esta biblioteca facilita o gerenciamento de atualiza\u00c3\u00a7\u00c3\u00b5es OTA no ESP32. Inclui suporte para modo access point e webserver ass\u00c3\u00adncrono. Pode ser integrada facilmente em projetos baseados em ESP32.",
     "category": "Communication",
-    "keywords": ["OTA", "ESP32", "Update", "WiFi", "AP", "Async"],
-    "architectures": ["esp32"],
-    "repository": {"type": "git", "url": "https://github.com/ShafickCruz/SHtools_ESP32_OTA_AP"},
+    "keywords": [
+        "OTA",
+        "ESP32",
+        "Update",
+        "WiFi",
+        "AP",
+        "Async"
+    ],
+    "architectures": [
+        "esp32"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ShafickCruz/SHtools_ESP32_OTA_AP"
+    },
     "website": "https://github.com/ShafickCruz/SHtools_ESP32_OTA_AP",
     "issues": "https://github.com/ShafickCruz/SHtools_ESP32_OTA_AP/issues",
-    "dependencies": {"ayushsharma82/ElegantOTA":"^3.1.5"}
-  }
-  
+    "dependencies": {
+        "ayushsharma82/ElegantOTA": "^3.1.5"
+    }
+}
