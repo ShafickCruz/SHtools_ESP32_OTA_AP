@@ -4,8 +4,8 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <ElegantOTA.h>
-// #include <AsyncTCP.h>
-// #include <ESPAsyncWebServer.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 
 class SHtools_ESP32_OTA_AP
 {
