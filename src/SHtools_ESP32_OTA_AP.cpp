@@ -1,7 +1,7 @@
 #include "SHtools_ESP32_OTA_AP.h"
 
 // pagina HTML do index
-const char SHtools_ESP32_OTA_AP::controlPanelHTML[] PROGMEM =
+const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM =
     "<!DOCTYPE html>"
     "<html lang='en'>"
     "<head>"
@@ -105,7 +105,7 @@ void SHtools_ESP32_OTA_AP::startServerMode()
     ServerMode = true;
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(200, "text/plain", controlPanelHTML); });
+              { request->send_P(200, "text/plain", IndexHTML); });
 
     ElegantOTA.begin(&server); // Start ElegantOTA
 
