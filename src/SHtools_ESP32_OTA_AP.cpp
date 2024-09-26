@@ -1,33 +1,61 @@
 #include "SHtools_ESP32_OTA_AP.h"
 
+const char SHtools_ESP32_OTA_AP::IndexSerial[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>ESP32 Serial Monitor</title>
+  <script>
+    var gateway = `ws://${window.location.hostname}/ws`;
+    var websocket;
+    window.addEventListener('load', onLoad);
+    function onLoad(event) {
+      initWebSocket();
+    }
+    function initWebSocket() {
+      websocket = new WebSocket(gateway);
+      websocket.onmessage = function(event) {
+        document.getElementById('output').innerHTML += event.data + '<br>';
+      };
+    }
+  </script>
+</head>
+<body>
+  <h1>ESP32 Serial Monitor</h1>
+  <div id="output"></div>
+</body>
+</html>
+)rawliteral";
+
 // pagina HTML do index
-const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM =
-    "<!DOCTYPE html>"
-    "<html lang='en'>"
-    "<head>"
-    "<meta charset='UTF-8'>"
-    "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-    "<title>ESP32 Control Panel</title>"
-    "<style>"
-    "body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f0f0; margin-top: 50px; }"
-    "h1 { color: #333; }"
-    ".button { display: inline-block; padding: 15px 25px; font-size: 18px; margin: 10px; cursor: pointer; "
-    "border: none; border-radius: 5px; background-color: #007bff; color: white; text-decoration: none; }"
-    ".button:hover { background-color: #0056b3; }"
-    "</style>"
-    "</head>"
-    "<body>"
-    "<h1>ESP32 Control Panel</h1>"
-    "<a href='/update' class='button'>Update OTA</a><br>"
-    "<button class='button' onclick=\"alert('TODO: Serial Monitor page')\">Serial Monitor</button><br>"
-    "<button class='button' onclick=\"alert('TODO: Info page')\">Informações</button>"
-    "</body>"
-    "</html>";
+const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>ESP32 Control Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f0f0; margin-top: 50px; }
+    h1 { color: #333; }
+    .button { display: inline-block; padding: 15px 25px; font-size: 18px; margin: 10px; cursor: pointer; 
+              border: none; border-radius: 5px; background-color: #007bff; color: white; text-decoration: none; }
+    .button:hover { background-color: #0056b3; }
+  </style>
+</head>
+<body>
+  <h1>ESP32 Control Panel</h1>
+  <a href='/update' class='button'>Update OTA</a><br>
+  <button class='button' onclick="alert('TODO: Serial Monitor page')">Serial Monitor</button><br>
+  <button class='button' onclick="alert('TODO: Info page')">Informações</button>
+</body>
+</html>
+)rawliteral";
 
 SHtools_ESP32_OTA_AP::SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch)
     : ServerMode(false), buttonPressTime(0), lastButtonStateChangeTime(0), longPressDuration(3000),
       debounceDelay(50), lastButtonState(HIGH), ledPin(ledPin), buttonPin(buttonPin),
-      nomeSketch(nomeSketch), ota_progress_millis(0), server(80) {}
+      nomeSketch(nomeSketch), ota_progress_millis(0), server(80), ws("/ws") {}
 
 void SHtools_ESP32_OTA_AP::begin()
 {
@@ -39,6 +67,12 @@ void SHtools_ESP32_OTA_AP::begin()
 void SHtools_ESP32_OTA_AP::handle()
 {
     ElegantOTA.loop(); // processa as requisições OTA
+
+    if (Serial.available())
+    {
+        String data = Serial.readStringUntil('\n');
+        ws.textAll(data);
+    }
 
     // Se estiver no modo Servidor, faz o LED piscar continuamente,
     // Se não estiver, keep watching o botao
@@ -118,6 +152,16 @@ void SHtools_ESP32_OTA_AP::startServerMode()
 
     ElegantOTA.onEnd([this](bool success)
                      { this->onOTAEnd(success); });
+
+    // ws.onEvent(onWebSocketEvent);
+
+    ws.onEvent([this](AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
+               { this->onWebSocketEvent(server, client, type, arg, data, len); });
+
+    server.addHandler(&ws);
+
+    server.on("/serial", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(200, "text/html", IndexSerial); });
 
     server.begin();
 
@@ -200,4 +244,9 @@ String SHtools_ESP32_OTA_AP::generateSSID()
 bool SHtools_ESP32_OTA_AP::get_ServerMode() const
 {
     return ServerMode;
+}
+
+void SHtools_ESP32_OTA_AP::onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
+{
+    // Handle WebSocket events here
 }

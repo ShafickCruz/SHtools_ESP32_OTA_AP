@@ -30,8 +30,10 @@ private:
     int buttonPin;
     String nomeSketch;
     unsigned long ota_progress_millis;
-    AsyncWebServer server; // Declaração do servidor como membro da classe
-    static const char IndexHTML[] PROGMEM; // Declaração da página HTML
+    AsyncWebServer server;                   // Declaração do servidor como membro da classe
+    AsyncWebSocket ws;                       // Declaração do servidor websocket como membro da classe
+    static const char IndexHTML[] PROGMEM;   // Declaração da página HTML
+    static const char IndexSerial[] PROGMEM; // Declaração da página HTML
 
     void led_handle();
     void bt_handle();
@@ -41,6 +43,7 @@ private:
     void startServerMode(); // Inicia o servidor AP
     void WifiSetup();
     String generateSSID(); // Gera SSID
+    void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
 };
 
 #endif
