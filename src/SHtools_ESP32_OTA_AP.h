@@ -21,6 +21,7 @@ public:
 
 private:
     bool ServerMode;
+    unsigned long ServerModeInicio;
     unsigned long buttonPressTime;
     unsigned long lastButtonStateChangeTime;
     unsigned long longPressDuration;
