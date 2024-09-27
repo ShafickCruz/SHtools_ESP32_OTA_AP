@@ -3,7 +3,7 @@
 // pagina HTML do index
 const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML>
-<html lang='en'>
+<html lang='pt'>
 <head>
   <meta charset='UTF-8'>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
@@ -12,7 +12,8 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
     body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f0f0; margin-top: 50px; }
     h1 { color: #333; }
     .button { display: inline-block; padding: 15px 25px; font-size: 18px; margin: 10px; cursor: pointer; 
-              border: none; border-radius: 5px; background-color: #007bff; color: white; text-decoration: none; }
+              border: none; border-radius: 5px; background-color: #007bff; color: white; text-decoration: none; 
+              min-width: 150px; } /* Defina o tamanho mínimo */
     .button:hover { background-color: #0056b3; }
   </style>
 </head>
@@ -36,55 +37,27 @@ void SHtools_ESP32_OTA_AP::begin()
     pinMode(ledPin, OUTPUT);
     pinMode(buttonPin, INPUT_PULLUP);
 
-    if (Serial)
-        Serial.println("cuzao");
+    // se a serial não foi iniciada pelo cliente, inicia a serial
+    if (!Serial)
+    {
+        Serial.begin(115200);
+        delay(1000);
+    }
 
     // desconecta WiFi e webserver se estiver conectado,
-    // porque WebSerial inicia o wifi internamente na criação da instância.
+    // porque WebSerial pode iniciar o wifi/server internamente na criação da instância.
     if (WiFi.status() == WL_CONNECTED)
     {
-
-        Serial.println("aqui 1");
-
         WiFi.disconnect();
-        delay(1000);
+        delay(2000);
 
         if (WiFi.status() == WL_DISCONNECTED)
-
-            Serial.println("aqui 2");
-
-        server.end();
+            server.end();
     }
 }
 
 void SHtools_ESP32_OTA_AP::handle()
 {
-
-    if (WiFi.status() == WL_CONNECTED)
-    {
-
-        Serial.println("aqui 3");
-
-        WiFi.disconnect();
-        delay(1000);
-
-        if (WiFi.status() == WL_DISCONNECTED)
-
-            Serial.println("aqui 4");
-
-        server.end();
-    }
-
-    /* PARA TESTES
-    static unsigned long last_print_time = millis();
-    // Print every 2 seconds (non-blocking)
-    if ((unsigned long)(millis() - last_print_time) > 2000)
-    {
-        WebSerial.print("Teste: ");
-        WebSerial.println(millis());
-    }
-    ///////////////////
-*/
     /*
     Se estiver no modo Servidor, faz o LED piscar continuamente e processa as requisições. Se não estiver, verifica se debug inicial está habilitado.
     Se debug inicial estiver habilitado, inicia o processo de ServerMode e ignora o botão e se não estiver, keep watching o botão.
