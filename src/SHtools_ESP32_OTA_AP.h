@@ -35,7 +35,7 @@ private:
     AsyncWebServer server;                 // Declaração do servidor como membro da classe
     static const char IndexHTML[] PROGMEM; // Declaração da página HTML
 
-    void led_handle();
+    void ServerMode_handle();
     void bt_handle();
     void onOTAStart();
     void onOTAProgress(size_t current, size_t final);
