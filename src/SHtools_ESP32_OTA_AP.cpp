@@ -127,7 +127,6 @@ void SHtools_ESP32_OTA_AP::bt_handle()
 
 void SHtools_ESP32_OTA_AP::startServerMode()
 {
-    ServerMode = true;
     Serial.println("Entrando em modo Servidor...");
 
     WifiSetup();               // configura e inicializa o servidor wifi
@@ -137,13 +136,11 @@ void SHtools_ESP32_OTA_AP::startServerMode()
     server.begin();            // Start webserver
 
     Serial.println("Servidor iniciado");
+    ServerMode = true;
 }
 
 void SHtools_ESP32_OTA_AP::rotasEcallbacks()
 {
-    if (!ServerMode) // se nao estiver em modo servidor, impede que entradas na serial seja processadas
-        return;
-
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
               { request->send(200, "text/html", IndexHTML); });
 
