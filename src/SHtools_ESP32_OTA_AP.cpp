@@ -36,6 +36,9 @@ void SHtools_ESP32_OTA_AP::begin()
     pinMode(ledPin, OUTPUT);
     pinMode(buttonPin, INPUT_PULLUP);
 
+    if (Serial)
+        Serial.println("cuzao");
+
     // desconecta WiFi e webserver se estiver conectado,
     // porque WebSerial inicia o wifi internamente na criação da instância.
     if (WiFi.status() == WL_CONNECTED)
@@ -60,14 +63,14 @@ void SHtools_ESP32_OTA_AP::handle()
     if (WiFi.status() == WL_CONNECTED)
     {
 
-        Serial.println("aqui 1");
+        Serial.println("aqui 3");
 
         WiFi.disconnect();
         delay(1000);
 
         if (WiFi.status() == WL_DISCONNECTED)
 
-            Serial.println("aqui 2");
+            Serial.println("aqui 4");
 
         server.end();
     }
