@@ -41,6 +41,7 @@ private:
     void onOTAEnd(bool success);
     void startServerMode(); // Inicia o servidor AP
     void WifiSetup();
+    void rotasEcallbacks();
     String generateSSID(); // Gera SSID
 };
 

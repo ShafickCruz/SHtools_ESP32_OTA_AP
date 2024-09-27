@@ -19,7 +19,7 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
 <body>
   <h1>ESP32 Control Panel</h1>
   <a href='/update' class='button'>Update OTA</a><br>
-  <button class='button' onclick="alert('TODO: Serial Monitor page')">Serial Monitor</button><br>
+  <a href='/webserial' class='button'>Monitor Serial</a><br>
   <button class='button' onclick="alert('TODO: Info page')">Informações</button>
 </body>
 </html>
@@ -40,19 +40,17 @@ void SHtools_ESP32_OTA_AP::begin()
 void SHtools_ESP32_OTA_AP::handle()
 {
     ElegantOTA.loop(); // processa as requisições OTA
+    WebSerial.loop();  // processa as requisições Webserial
 
+    /* PARA TESTES */
     static unsigned long last_print_time = millis();
-
     // Print every 2 seconds (non-blocking)
     if ((unsigned long)(millis() - last_print_time) > 2000)
     {
-        WebSerial.print(F("IP address: "));
-        WebSerial.println(WiFi.localIP());
-        WebSerial.printf("Uptime: %lums\n", millis());
-        WebSerial.printf("Free heap: %u\n", ESP.getFreeHeap());
-        last_print_time = millis();
+        WebSerial.print("Teste: ");
+        WebSerial.println(millis());
     }
-    WebSerial.loop();
+    ///////////////////
 
     // Se estiver no modo Servidor, faz o LED piscar continuamente,
     // Se não estiver, keep watching o botao
@@ -65,7 +63,7 @@ void SHtools_ESP32_OTA_AP::led_handle()
 
     // Faz o LED piscar continuamente
     static unsigned long lastBlinkTime = 0;
-    unsigned long blinkInterval = 250; // Piscar a cada 250ms
+    unsigned long blinkInterval = 150; // Piscar a cada 250ms
     cTime = millis();
 
     if (cTime - lastBlinkTime >= blinkInterval)
@@ -83,13 +81,10 @@ void SHtools_ESP32_OTA_AP::bt_handle()
     // Verifica se o estado do botão mudou e se passou o tempo suficiente para o debounce
     if (currentButtonState != lastButtonState)
     {
-
         if ((currentTime - lastButtonStateChangeTime) > debounceDelay)
         {
             if (currentButtonState == LOW)
-            {
                 buttonPressTime = currentTime; // Registra o momento em que o botão foi pressionado
-            }
 
             lastButtonStateChangeTime = currentTime;
         }
@@ -102,6 +97,7 @@ void SHtools_ESP32_OTA_AP::bt_handle()
         digitalWrite(ledPin, !digitalRead(ledPin)); // apaga ou acende o led para indicar que o longpress foi reconhecido
         while (digitalRead(buttonPin) == LOW)
         {
+            delay(100);
         }
 
         Serial.println("Entrando em modo Servidor...");
@@ -114,14 +110,20 @@ void SHtools_ESP32_OTA_AP::bt_handle()
 
 void SHtools_ESP32_OTA_AP::startServerMode()
 {
-    // configura e inicializa o servidor wifi
-    WifiSetup();
-    ServerMode = true;
-
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-              { request->send(200, "text/plain", IndexHTML); });
-
+    WifiSetup();               // configura e inicializa o servidor wifi
+    rotasEcallbacks();         // define rotas e callbacks
     ElegantOTA.begin(&server); // Start ElegantOTA
+    WebSerial.begin(&server);  // Start Webserial
+    server.begin();            // Start webserver
+
+    ServerMode = true;
+    Serial.println("Servidor iniciado");
+}
+
+void SHtools_ESP32_OTA_AP::rotasEcallbacks()
+{
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(200, "text/html", IndexHTML); });
 
     // ElegantOTA callbacks
     ElegantOTA.onStart([this]()
@@ -133,16 +135,7 @@ void SHtools_ESP32_OTA_AP::startServerMode()
     ElegantOTA.onEnd([this](bool success)
                      { this->onOTAEnd(success); });
 
-    //
-    //
-    //
-    //
-    //
-    //
-    // Initialize WebSerial
-    WebSerial.begin(&server);
-
-    // Attach a callback function to handle incoming messages
+    // Callback para incoming messages do webserial
     WebSerial.onMessage([](uint8_t *data, size_t len)
                         {
     Serial.printf("Received %lu bytes from WebSerial: ", len);
@@ -154,15 +147,39 @@ void SHtools_ESP32_OTA_AP::startServerMode()
       d += char(data[i]);
     }
     WebSerial.println(d); });
-    //
-    //
-    //
-    //
-    //
-    //
-    server.begin();
+}
 
-    Serial.println("Servidor iniciado");
+void SHtools_ESP32_OTA_AP::WifiSetup()
+{
+    // desconecta WiFi
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        WiFi.disconnect();
+        delay(2000);
+    }
+
+    // Configura o servidor AP
+    IPAddress local_ip(192, 168, 100, 100);
+    IPAddress local_mask(255, 255, 255, 0);
+    IPAddress gateway(192, 168, 100, 1);
+    String ssid = "192.168.100.100 -> " + generateSSID(); // Gera o SSID com identificador único
+
+    // Aguarda a inicialização do servidor wifi
+    Serial.println("inicializando webserver.");
+    while (!WiFi.softAP(ssid.c_str()))
+    {
+        Serial.print(".");
+        delay(100);
+    }
+
+    // aplica as configurações
+    WiFi.softAPConfig(local_ip, gateway, local_mask);
+
+    Serial.println("Access Point criado com sucesso.");
+    Serial.print("SSID: ");
+    Serial.println(ssid);
+    Serial.print("IP do ESP32: ");
+    Serial.println(WiFi.softAPIP());
 }
 
 void SHtools_ESP32_OTA_AP::onOTAStart()
@@ -194,39 +211,6 @@ void SHtools_ESP32_OTA_AP::onOTAEnd(bool success)
         Serial.println("Houve um erro durante o update OTA!");
     }
     // <Add your own code here>
-}
-
-void SHtools_ESP32_OTA_AP::WifiSetup()
-{
-    // desconecta WiFi
-    if (WiFi.status() == WL_CONNECTED)
-    {
-        WiFi.disconnect();
-        delay(2000);
-    }
-
-    // Configura o servidor AP
-    IPAddress local_ip(192, 168, 100, 100);
-    IPAddress local_mask(255, 255, 255, 0);
-    IPAddress gateway(192, 168, 100, 1);
-    String ssid = "192.168.100.100 -> " + generateSSID(); // Gera o SSID com identificador único
-
-    // Aguarda a inicialização do servidor wifi
-    Serial.println("inicializando webserver.");
-    while (!WiFi.softAP(ssid.c_str()))
-    {
-        delay(500);
-        Serial.print(".");
-    }
-
-    // aplica as configurações
-    WiFi.softAPConfig(local_ip, gateway, local_mask);
-
-    Serial.println("Access Point criado com sucesso.");
-    Serial.print("SSID: ");
-    Serial.println(ssid);
-    Serial.print("IP do ESP32: ");
-    Serial.println(WiFi.softAPIP());
 }
 
 String SHtools_ESP32_OTA_AP::generateSSID()
