@@ -15,6 +15,44 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
               border: none; border-radius: 5px; background-color: #007bff; color: white; text-decoration: none; 
               min-width: 150px; }
     .button:hover { background-color: #0056b3; }
+    footer { margin-top: 30px; color: #555; font-size: 14px; }
+  </style>
+  <script>
+    function showAlertAndRedirect() {
+      alert('ATENÇÃO!!! Na próxima página, ao selecionar o arquivo de firmware, ele será enviado automaticamente, sem a necessidade de clicar em botão de envio.');
+      window.location.href = '/update';
+    }
+  </script>
+</head>
+<body>
+  <h1>SHtools ESP32 UPDATE</h1>
+  <a href='javascript:void(0)' class='button' onclick='showAlertAndRedirect()'>Update OTA</a><br>
+  <a href='/webserial' class='button'>Monitor Serial</a><br>
+  <button class='button' onclick="alert('TODO: Info page')">Informações</button>
+
+  <footer>
+    <p><strong>Comandos Disponíveis:</strong></p>
+    <p><code>cmd:DebugInicial</code> - Define se o sistema iniciará em modo debug ou se dependerá de pressionar o botão para entrar no modo debug. O modo debug permanece ativo por até 30 minutos.</p>
+  </footer>
+</body>
+</html>
+)rawliteral";
+
+/*
+const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML>
+<html lang='pt'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>ESP32 Control Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f0f0; margin-top: 50px; }
+    h1 { color: #333; }
+    .button { display: inline-block; padding: 15px 25px; font-size: 18px; margin: 10px; cursor: pointer;
+              border: none; border-radius: 5px; background-color: #007bff; color: white; text-decoration: none;
+              min-width: 150px; }
+    .button:hover { background-color: #0056b3; }
   </style>
   <script>
     function showAlertAndRedirect() {
@@ -31,11 +69,12 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
 </body>
 </html>
 )rawliteral";
+*/
 
-SHtools_ESP32_OTA_AP::SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch, bool _debugInicial = false)
+SHtools_ESP32_OTA_AP::SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch)
     : ServerMode(false), ServerModeInicio(0), buttonPressTime(0), lastButtonStateChangeTime(0), longPressDuration(3000),
       debounceDelay(50), lastButtonState(HIGH), ledPin(ledPin), buttonPin(buttonPin),
-      nomeSketch(nomeSketch), Debuginicial(_debugInicial), ota_progress_millis(0), server(80) {}
+      nomeSketch(nomeSketch), DebugInicial(0), ota_progress_millis(0), server(80) {}
 
 void SHtools_ESP32_OTA_AP::begin()
 {
@@ -60,6 +99,24 @@ void SHtools_ESP32_OTA_AP::begin()
         if (WiFi.status() == WL_DISCONNECTED)
             server.end();
     }
+
+    // Iniciar Preferences com o namespace "_config"
+    config.begin("_config", false);
+
+    // Verificar se a chave "DebugInicial" existe
+    if (!config.isKey("DebugInicial"))
+    {
+        // Se não existe, cria e define o valor como false (0)
+        config.putBool("DebugInicial", false);
+        DebugInicial = false;
+    }
+    else
+    {
+        // Se existe, obtém o valor e atribui à variável
+        DebugInicial = config.getBool("DebugInicial");
+    }
+
+    config.end(); // Fecha preferences para liberar recursos
 }
 
 void SHtools_ESP32_OTA_AP::handle()
@@ -68,21 +125,24 @@ void SHtools_ESP32_OTA_AP::handle()
     Se estiver no modo Servidor, faz o LED piscar continuamente e processa as requisições. Se não estiver, verifica se debug inicial está habilitado.
     Se debug inicial estiver habilitado, inicia o processo de ServerMode e ignora o botão e se não estiver, keep watching o botão.
     */
-
     if (ServerMode)
     {
         ServerMode_handle();
 
-        // Se está em modo servidor há mais de 30 minutos, reinicia o esp para sair do modo servidor
+        /*
+        Se está em modo servidor há mais de 30 minutos,
+        desativa o modo DebugInicial e reinicia o esp para sair do modo servidor
+        */
         unsigned long cTime = millis();
         if ((cTime - ServerModeInicio) >= 1800000) // 30 minutos
         {
-            ESP.restart(); // Reinicia o ESP32
+            set_DebugInicial(false); // Desativa DebugInicial
+            ESP.restart();           // Reinicia o ESP32
         }
     }
     else
     {
-        if (Debuginicial)
+        if (DebugInicial)
         {
             startServerMode();
         }
@@ -177,6 +237,10 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
                      { this->onOTAEnd(success); });
 
     // Callback para incoming messages do webserial
+    WebSerial.onMessage([this](uint8_t *data, size_t len)
+                        { this->ComandoWebSerial(data, len); });
+
+    /*
     WebSerial.onMessage([](uint8_t *data, size_t len)
                         {
     Serial.printf("Received %u bytes from WebSerial: ", len);
@@ -188,6 +252,7 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
       d += char(data[i]);
     }
     WebSerial.println(d); });
+    */
 }
 
 void SHtools_ESP32_OTA_AP::WifiSetup()
@@ -267,4 +332,52 @@ String SHtools_ESP32_OTA_AP::generateSSID()
 bool SHtools_ESP32_OTA_AP::get_ServerMode() const
 {
     return ServerMode;
+}
+
+// Implementação do método setter para DebugInicial
+void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
+{
+    // Grava o valor de DebugInicial e o armazena no Preferences
+    config.begin("_config", false);        // Abre o Preferences para escrita
+    config.putBool("DebugInicial", valor); // Grava o valor na chave
+    DebugInicial = valor;                  // Atualiza a variável interna
+    config.end();                          // Fecha o Preferences após a gravação
+}
+
+void SHtools_ESP32_OTA_AP::ComandoWebSerial(uint8_t *data, size_t len)
+{
+    String msgRecebida = "";
+
+    // Converte os dados recebidos para uma string
+    for (size_t i = 0; i < len; i++)
+    {
+        msgRecebida += char(data[i]);
+    }
+
+    // Verifica se o comando recebido contém "cmd:" (case insensitive)
+    if (msgRecebida.substring(0, 4).equalsIgnoreCase("cmd:"))
+    {
+        // Extrair o comando após "cmd:"
+        String comando = msgRecebida.substring(4); // Remove "cmd:" e obtém o comando
+
+        // Verificar qual comando foi enviado (case insensitive)
+        if (comando.equalsIgnoreCase("DebugInicial"))
+        {
+            // Alterna o valor de DebugInicial
+            DebugInicial = !DebugInicial;
+            set_DebugInicial(DebugInicial); // Grava a mudança via set_DebugInicial()
+
+            // Reinicia o ESP32 após alterar o valor
+            delay(1000);
+            ESP.restart();
+        }
+        else
+        {
+            // WebSerial.println("Comando desconhecido.");
+        }
+    }
+    else
+    {
+        // WebSerial.println("Não é um comando válido.");
+    }
 }

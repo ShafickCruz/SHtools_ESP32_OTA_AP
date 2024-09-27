@@ -7,17 +7,24 @@
 #include <AsyncTCP.h>
 #include <ElegantOTA.h>
 #include <WebSerial.h>
-#include <pgmspace.h> // para utilizar PROGMEM
+#include <pgmspace.h>    // para utilizar PROGMEM - memoria flash
+#include <Preferences.h> // memoria flash
 
 class SHtools_ESP32_OTA_AP
 {
 public:
-    SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch, bool Debuginicial);
-    void begin();  // Inicializa a configuração inicial
-    void handle(); // Deve ser chamado no loop principal para processar OTA e verificar o botão
+    SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch);
+    void begin();  // like setup
+    void handle(); // like loop
 
     // Método getter para otaMode
     bool get_ServerMode() const;
+
+    // Setter para DebugInicial
+    void set_DebugInicial(bool valor);
+
+    // Processa mensagens recebidas via WebSerial
+    void ComandoWebSerial(uint8_t *data, size_t len);
 
 private:
     bool ServerMode;
@@ -31,9 +38,11 @@ private:
     int ledPin;
     int buttonPin;
     String nomeSketch;
-    bool Debuginicial;
+    bool DebugInicial;
     unsigned long ota_progress_millis;
-    AsyncWebServer server;                 // Declaração do servidor como membro da classe
+    AsyncWebServer server; // Declaração do servidor como membro da classe
+
+    Preferences config;                    // instancia para configrações usando preferences
     static const char IndexHTML[] PROGMEM; // Declaração da página HTML
 
     void ServerMode_handle();
