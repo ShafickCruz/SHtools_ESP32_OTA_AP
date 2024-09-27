@@ -157,7 +157,7 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
     // Callback para incoming messages do webserial
     WebSerial.onMessage([](uint8_t *data, size_t len)
                         {
-    Serial.printf("Received %lu bytes from WebSerial: ", len);
+    Serial.printf("Received %u bytes from WebSerial: ", len);
     Serial.write(data, len);
     Serial.println();
     WebSerial.println("Received Data...");
