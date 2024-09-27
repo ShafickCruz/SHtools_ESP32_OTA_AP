@@ -18,13 +18,13 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
   </style>
   <script>
     function showAlertAndRedirect() {
-      alert('ATENÇÃO!!! Na próxima página, ao selecionar o arquivo de firmware, ele será enviado automaticamente, sem a necessidade de clicar no botão de envio.');
+      alert('ATENÇÃO!!! Na próxima página, ao selecionar o arquivo de firmware, ele será enviado automaticamente, sem a necessidade de clicar em botão de envio.');
       window.location.href = '/update';
     }
   </script>
 </head>
 <body>
-  <h1>ESP32 Control Panel</h1>
+  <h1>SHtools ESP32 UPDATE</h1>
   <a href='javascript:void(0)' class='button' onclick='showAlertAndRedirect()'>Update OTA</a><br>
   <a href='/webserial' class='button'>Monitor Serial</a><br>
   <button class='button' onclick="alert('TODO: Info page')">Informações</button>
