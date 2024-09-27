@@ -25,10 +25,10 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
 </html>
 )rawliteral";
 
-SHtools_ESP32_OTA_AP::SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch)
+SHtools_ESP32_OTA_AP::SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch, bool _debugInicial = false)
     : ServerMode(false), buttonPressTime(0), lastButtonStateChangeTime(0), longPressDuration(3000),
       debounceDelay(50), lastButtonState(HIGH), ledPin(ledPin), buttonPin(buttonPin),
-      nomeSketch(nomeSketch), ota_progress_millis(0), server(80) {}
+      nomeSketch(nomeSketch), Debuginicial(_debugInicial), ota_progress_millis(0), server(80) {}
 
 void SHtools_ESP32_OTA_AP::begin()
 {
@@ -52,9 +52,26 @@ void SHtools_ESP32_OTA_AP::handle()
     }
     ///////////////////
 
-    // Se estiver no modo Servidor, faz o LED piscar continuamente,
-    // Se não estiver, keep watching o botao
-    ServerMode ? led_handle() : bt_handle();
+    /*
+    Se estiver no modo Servidor, faz o LED piscar continuamente e se não estiver, verifica se debug inicial está habilitado.
+    Se debug inicial estiver habilitado, inicia o processo de ServerMode e ignora o botão e se não estiver, keep watching o botão.
+    */
+
+    if (ServerMode)
+    {
+        led_handle();
+    }
+    else
+    {
+        if (Debuginicial)
+        {
+            startServerMode();
+        }
+        else
+        {
+            bt_handle();
+        }
+    }
 }
 
 void SHtools_ESP32_OTA_AP::led_handle()
@@ -100,7 +117,6 @@ void SHtools_ESP32_OTA_AP::bt_handle()
             delay(100);
         }
 
-        Serial.println("Entrando em modo Servidor...");
         startServerMode(); // Chama a função startOTA para iniciar o processo
     }
 
@@ -110,6 +126,8 @@ void SHtools_ESP32_OTA_AP::bt_handle()
 
 void SHtools_ESP32_OTA_AP::startServerMode()
 {
+    Serial.println("Entrando em modo Servidor...");
+
     WifiSetup();               // configura e inicializa o servidor wifi
     rotasEcallbacks();         // define rotas e callbacks
     ElegantOTA.begin(&server); // Start ElegantOTA
