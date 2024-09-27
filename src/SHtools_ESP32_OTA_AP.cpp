@@ -57,6 +57,21 @@ void SHtools_ESP32_OTA_AP::begin()
 void SHtools_ESP32_OTA_AP::handle()
 {
 
+    if (WiFi.status() == WL_CONNECTED)
+    {
+
+        Serial.println("aqui 1");
+
+        WiFi.disconnect();
+        delay(1000);
+
+        if (WiFi.status() == WL_DISCONNECTED)
+
+            Serial.println("aqui 2");
+
+        server.end();
+    }
+
     /* PARA TESTES
     static unsigned long last_print_time = millis();
     // Print every 2 seconds (non-blocking)
@@ -174,9 +189,6 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
     // Callback para incoming messages do webserial
     WebSerial.onMessage([](uint8_t *data, size_t len)
                         {
-    
-    Serial.println("cu");
-
     Serial.printf("Received %u bytes from WebSerial: ", len);
     Serial.write(data, len);
     Serial.println();
