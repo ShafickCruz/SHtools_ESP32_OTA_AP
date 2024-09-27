@@ -27,7 +27,7 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
 )rawliteral";
 
 SHtools_ESP32_OTA_AP::SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch, bool _debugInicial = false)
-    : ServerMode(false), buttonPressTime(0), lastButtonStateChangeTime(0), longPressDuration(3000),
+    : ServerMode(false), ServerModeInicio(0), buttonPressTime(0), lastButtonStateChangeTime(0), longPressDuration(3000),
       debounceDelay(50), lastButtonState(HIGH), ledPin(ledPin), buttonPin(buttonPin),
       nomeSketch(nomeSketch), Debuginicial(_debugInicial), ota_progress_millis(0), server(80) {}
 
@@ -66,6 +66,13 @@ void SHtools_ESP32_OTA_AP::handle()
     if (ServerMode)
     {
         ServerMode_handle();
+
+        // Se está em modo servidor há mais de 30 minutos, reinicia o esp para sair do modo servidor
+        unsigned long cTime = millis();
+        if ((cTime - ServerModeInicio) >= 1800000) // 30 minutos
+        {
+            ESP.restart(); // Reinicia o ESP32
+        }
     }
     else
     {
@@ -92,7 +99,7 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
     unsigned long blinkInterval = 150; // Piscar a cada 250ms
     cTime = millis();
 
-    if (cTime - lastBlinkTime >= blinkInterval)
+    if ((cTime - lastBlinkTime) >= blinkInterval)
     {
         digitalWrite(ledPin, !digitalRead(ledPin)); // Inverte o estado do LED
         lastBlinkTime = cTime;
@@ -145,6 +152,7 @@ void SHtools_ESP32_OTA_AP::startServerMode()
 
     Serial.println("Servidor iniciado");
     ServerMode = true;
+    ServerModeInicio = millis();
 }
 
 void SHtools_ESP32_OTA_AP::rotasEcallbacks()
@@ -219,7 +227,8 @@ void SHtools_ESP32_OTA_AP::onOTAStart()
 void SHtools_ESP32_OTA_AP::onOTAProgress(size_t current, size_t final)
 {
     // Log every 1 second
-    if (millis() - ota_progress_millis > 1000)
+    unsigned long cTime = millis();
+    if ((cTime - ota_progress_millis) > 1000)
     {
         ota_progress_millis = millis();
         Serial.printf("OTA Progress Current: %u bytes, Final: %u bytes\n", current, final);
