@@ -40,11 +40,17 @@ void SHtools_ESP32_OTA_AP::begin()
     // porque WebSerial inicia o wifi internamente na criação da instância.
     if (WiFi.status() == WL_CONNECTED)
     {
+
+        Serial.println("aqui 1");
+
         WiFi.disconnect();
         delay(1000);
 
         if (WiFi.status() == WL_DISCONNECTED)
-            server.end();
+
+            Serial.println("aqui 2");
+
+        server.end();
     }
 }
 
@@ -168,6 +174,9 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
     // Callback para incoming messages do webserial
     WebSerial.onMessage([](uint8_t *data, size_t len)
                         {
+    
+    Serial.println("cu");
+
     Serial.printf("Received %u bytes from WebSerial: ", len);
     Serial.write(data, len);
     Serial.println();
