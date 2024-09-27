@@ -42,7 +42,7 @@ void SHtools_ESP32_OTA_AP::handle()
     ElegantOTA.loop(); // processa as requisições OTA
     WebSerial.loop();  // processa as requisições Webserial
 
-    /* PARA TESTES */
+    /* PARA TESTES
     static unsigned long last_print_time = millis();
     // Print every 2 seconds (non-blocking)
     if ((unsigned long)(millis() - last_print_time) > 2000)
@@ -51,7 +51,7 @@ void SHtools_ESP32_OTA_AP::handle()
         WebSerial.println(millis());
     }
     ///////////////////
-
+*/
     /*
     Se estiver no modo Servidor, faz o LED piscar continuamente e se não estiver, verifica se debug inicial está habilitado.
     Se debug inicial estiver habilitado, inicia o processo de ServerMode e ignora o botão e se não estiver, keep watching o botão.
