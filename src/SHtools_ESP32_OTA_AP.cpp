@@ -96,6 +96,18 @@ void SHtools_ESP32_OTA_AP::handle()
     {
         ServerMode_handle();
 
+        static unsigned long last_print_time = millis();
+
+        // Print every 2 seconds (non-blocking)
+        if ((unsigned long)(millis() - last_print_time) > 2000)
+        {
+            WebSerial.print(F("IP address: "));
+            WebSerial.println(WiFi.localIP());
+            WebSerial.printf("Uptime: %lums\n", millis());
+            WebSerial.printf("Free heap: %u\n", ESP.getFreeHeap());
+            last_print_time = millis();
+        }
+
         /*
         Se está em modo servidor há mais de 30 minutos,
         desativa o modo DebugInicial e reinicia o esp para sair do modo servidor
@@ -216,14 +228,15 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
     // WebSerial.onMessage([this](uint8_t *data, size_t len)
     //                    { this->ComandoWebSerial(data, len); });
 
-    WebSerial.onMessage([](uint8_t *data, size_t len)
+    /* Attach Message Callback */
+    WebSerial.onMessage([&](uint8_t *data, size_t len)
                         {
-    Serial.printf("Received %u bytes from WebSerial: ", len);
+    Serial.printf("Received %lu bytes from WebSerial: ", len);
     Serial.write(data, len);
     Serial.println();
     WebSerial.println("Received Data...");
     String d = "";
-    for(size_t i = 0; i < len; i++){
+    for(size_t i=0; i < len; i++){
       d += char(data[i]);
     }
     WebSerial.println(d); });
