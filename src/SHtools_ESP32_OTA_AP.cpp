@@ -52,7 +52,7 @@ void SHtools_ESP32_OTA_AP::begin()
     // se a serial não foi iniciada pelo cliente, inicia a serial
     // if (!Serial)
     //{
-    // Serial.begin(115200);
+    Serial.begin(115200);
     // delay(1000);
     //}
 
