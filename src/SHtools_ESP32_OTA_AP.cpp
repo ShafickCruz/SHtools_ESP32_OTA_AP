@@ -96,18 +96,6 @@ void SHtools_ESP32_OTA_AP::handle()
     {
         ServerMode_handle();
 
-        static unsigned long last_print_time = millis();
-
-        // Print every 2 seconds (non-blocking)
-        if ((unsigned long)(millis() - last_print_time) > 2000)
-        {
-            WebSerial.print(F("IP address: "));
-            WebSerial.println(WiFi.localIP());
-            WebSerial.printf("Uptime: %lums\n", millis());
-            WebSerial.printf("Free heap: %u\n", ESP.getFreeHeap());
-            last_print_time = millis();
-        }
-
         /*
         Se está em modo servidor há mais de 30 minutos,
         desativa o modo DebugInicial e reinicia o esp para sair do modo servidor
@@ -152,11 +140,16 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
 
     static unsigned long aaa = millis();
 
-    if (millis() - aaa > 3000)
+    if ((unsigned long)millis() - aaa > 3000)
     {
         Serial.print("lib: ");
         Serial.println(millis());
         aaa = millis();
+    }
+
+    if (Serial.available())
+    {
+        WebSerial.print(Serial.read());
     }
 }
 
