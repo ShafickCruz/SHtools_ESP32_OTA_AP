@@ -17,7 +17,7 @@ public:
     void begin();  // like setup
     void handle(); // like loop
 
-    // Método getter para otaMode
+    // Método getter para ServerMode
     bool get_ServerMode() const;
 
     // Setter para DebugInicial

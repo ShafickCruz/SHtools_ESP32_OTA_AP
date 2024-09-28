@@ -354,7 +354,10 @@ void SHtools_ESP32_OTA_AP::ComandoWebSerial(uint8_t *data, size_t len)
         msgRecebida += char(data[i]);
     }
 
-    // Verifica se o comando recebido contém "cmd:" (case insensitive)
+    // Espelha a mensagem recebida no Serial Monitor
+    Serial.println(msgRecebida);
+
+    // Verifica se a mensagem recebida é um comando (case insensitive)
     if (msgRecebida.substring(0, 4).equalsIgnoreCase("cmd:"))
     {
         // Extrair o comando após "cmd:"
@@ -367,17 +370,26 @@ void SHtools_ESP32_OTA_AP::ComandoWebSerial(uint8_t *data, size_t len)
             DebugInicial = !DebugInicial;
             set_DebugInicial(DebugInicial); // Grava a mudança via set_DebugInicial()
 
+            // Espelha no WebSerial
+            // if (get_ServerMode()) {
+            //    WebSerial.println("DebugInicial toggled.");
+            //}
+
             // Reinicia o ESP32 após alterar o valor
             delay(1000);
             ESP.restart();
         }
         else
         {
-            // WebSerial.println("Comando desconhecido.");
+            // Comando desconhecido
+            // if (get_ServerMode()) {
+            //    WebSerial.println("Comando desconhecido.");
+            //}
         }
     }
-    else
-    {
-        // WebSerial.println("Não é um comando válido.");
-    }
+
+    // Espelha a mensagem no WebSerial se estiver ativo
+    // if (get_ServerMode()) {
+    WebSerial.println(msgRecebida);
+    //}
 }
