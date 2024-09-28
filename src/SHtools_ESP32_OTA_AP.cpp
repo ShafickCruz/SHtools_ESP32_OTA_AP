@@ -346,6 +346,19 @@ void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
 
 void SHtools_ESP32_OTA_AP::ComandoWebSerial(uint8_t *data, size_t len)
 {
+
+    Serial.printf("Received %u bytes from WebSerial: ", len);
+    Serial.write(data, len);
+    Serial.println();
+    WebSerial.println("Received Data...");
+    String d = "";
+    for (size_t i = 0; i < len; i++)
+    {
+        d += char(data[i]);
+    }
+    WebSerial.println(d);
+
+    /*
     String msgRecebida = "";
 
     // Converte os dados recebidos para uma string
@@ -392,4 +405,5 @@ void SHtools_ESP32_OTA_AP::ComandoWebSerial(uint8_t *data, size_t len)
     // if (get_ServerMode()) {
     WebSerial.println(msgRecebida);
     //}
+    */
 }
