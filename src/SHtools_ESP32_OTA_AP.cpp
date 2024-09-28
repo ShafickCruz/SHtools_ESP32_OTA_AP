@@ -50,11 +50,11 @@ void SHtools_ESP32_OTA_AP::begin()
     pinMode(buttonPin, INPUT_PULLUP);
 
     // se a serial não foi iniciada pelo cliente, inicia a serial
-    if (!Serial)
-    {
-        Serial.begin(115200);
-        delay(1000);
-    }
+    // if (!Serial)
+    //{
+    // Serial.begin(115200);
+    // delay(1000);
+    //}
 
     // desconecta WiFi e webserver se estiver conectado,
     // porque WebSerial pode iniciar o wifi/server internamente na criação da instância.
