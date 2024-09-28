@@ -38,39 +38,6 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
 </html>
 )rawliteral";
 
-/*
-const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
-<!DOCTYPE HTML>
-<html lang='pt'>
-<head>
-  <meta charset='UTF-8'>
-  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>ESP32 Control Panel</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f0f0; margin-top: 50px; }
-    h1 { color: #333; }
-    .button { display: inline-block; padding: 15px 25px; font-size: 18px; margin: 10px; cursor: pointer;
-              border: none; border-radius: 5px; background-color: #007bff; color: white; text-decoration: none;
-              min-width: 150px; }
-    .button:hover { background-color: #0056b3; }
-  </style>
-  <script>
-    function showAlertAndRedirect() {
-      alert('ATENÇÃO!!! Na próxima página, ao selecionar o arquivo de firmware, ele será enviado automaticamente, sem a necessidade de clicar em botão de envio.');
-      window.location.href = '/update';
-    }
-  </script>
-</head>
-<body>
-  <h1>SHtools ESP32 UPDATE</h1>
-  <a href='javascript:void(0)' class='button' onclick='showAlertAndRedirect()'>Update OTA</a><br>
-  <a href='/webserial' class='button'>Monitor Serial</a><br>
-  <button class='button' onclick="alert('TODO: Info page')">Informações</button>
-</body>
-</html>
-)rawliteral";
-*/
-
 SHtools_ESP32_OTA_AP::SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch)
     : ServerMode(false), ServerModeInicio(0), buttonPressTime(0), lastButtonStateChangeTime(0), longPressDuration(3000),
       debounceDelay(50), lastButtonState(HIGH), ledPin(ledPin), buttonPin(buttonPin),
@@ -169,6 +136,15 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
     {
         digitalWrite(ledPin, !digitalRead(ledPin)); // Inverte o estado do LED
         lastBlinkTime = cTime;
+    }
+
+    static unsigned long aaa = millis();
+
+    if (millis() - aaa > 3000)
+    {
+        Serial.print("lib: ");
+        Serial.println(millis());
+        aaa = millis();
     }
 }
 
