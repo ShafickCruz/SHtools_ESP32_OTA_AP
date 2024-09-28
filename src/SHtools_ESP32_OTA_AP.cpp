@@ -237,10 +237,9 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
                      { this->onOTAEnd(success); });
 
     // Callback para incoming messages do webserial
-    WebSerial.onMessage([this](uint8_t *data, size_t len)
-                        { this->ComandoWebSerial(data, len); });
+    // WebSerial.onMessage([this](uint8_t *data, size_t len)
+    //                    { this->ComandoWebSerial(data, len); });
 
-    /*
     WebSerial.onMessage([](uint8_t *data, size_t len)
                         {
     Serial.printf("Received %u bytes from WebSerial: ", len);
@@ -252,7 +251,6 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
       d += char(data[i]);
     }
     WebSerial.println(d); });
-    */
 }
 
 void SHtools_ESP32_OTA_AP::WifiSetup()
@@ -347,16 +345,19 @@ void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
 void SHtools_ESP32_OTA_AP::ComandoWebSerial(uint8_t *data, size_t len)
 {
 
-    Serial.printf("Received %u bytes from WebSerial: ", len);
-    Serial.write(data, len);
-    Serial.println();
-    WebSerial.println("Received Data...");
-    String d = "";
-    for (size_t i = 0; i < len; i++)
-    {
-        d += char(data[i]);
-    }
-    WebSerial.println(d);
+    /*
+        Serial.printf("Received %u bytes from WebSerial: ", len);
+        Serial.write(data, len);
+        Serial.println();
+        WebSerial.println("Received Data...");
+        String d = "";
+        for (size_t i = 0; i < len; i++)
+        {
+            d += char(data[i]);
+        }
+        WebSerial.println(d);
+
+    */
 
     /*
     String msgRecebida = "";
