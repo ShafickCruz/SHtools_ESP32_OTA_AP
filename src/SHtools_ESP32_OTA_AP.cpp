@@ -125,7 +125,11 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
 
     // Desvia o conteúde de Serial para Webserial
     if (Serial.available())
+    {
+        WebSerial.println("++++++++++++++++");
         WebSerial.println(Serial.readString());
+        WebSerial.println("----------------");
+    }
 
     // processa as requisições Webserial e OTA
     ElegantOTA.loop();
@@ -329,6 +333,7 @@ void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
 
 void SHtools_ESP32_OTA_AP::SerialHandle(uint8_t *data, size_t len)
 {
+    /*
     String msg = "";
 
     // Converte os dados recebidos para uma string
@@ -361,4 +366,5 @@ void SHtools_ESP32_OTA_AP::SerialHandle(uint8_t *data, size_t len)
         // Serial.println(msg);
         WebSerial.println(msg);
     }
+    */
 }
