@@ -123,6 +123,9 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
         ESP.restart();           // Reinicia o ESP32
     }
 
+    Serial.println("teste nervoso");
+    delay(1000);
+
     // Desvia o conteúde de Serial para Webserial
     if (Serial.available())
     {
