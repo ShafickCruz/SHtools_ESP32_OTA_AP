@@ -23,8 +23,7 @@ public:
     // Setter para DebugInicial
     void set_DebugInicial(bool valor);
 
-    // Processa mensagens recebidas via WebSerial
-    void SerialHandle(uint8_t *data, size_t len);
+    void printMSG(const String &msg);
 
 private:
     bool ServerMode;
@@ -50,8 +49,9 @@ private:
     void onOTAStart();
     void onOTAProgress(size_t current, size_t final);
     void onOTAEnd(bool success);
-    void SerialHandle();
-    void startServerMode(); // Inicia o servidor AP
+    void WebserialCallback(uint8_t *data, size_t len); // Processa mensagens recebidas via WebSerial
+    void startServerMode();                            // Inicia o servidor AP
+    bool SerialCMD(String _msg);
     void WifiSetup();
     void rotasEcallbacks();
     String generateSSID(); // Gera SSID

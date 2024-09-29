@@ -205,7 +205,7 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
 
     // Callback para incoming messages do webserial
     WebSerial.onMessage([this](uint8_t *data, size_t len)
-                        { this->SerialHandle(data, len); });
+                        { this->WebserialCallback(data, len); });
 
     /* Attach Message Callback */
     /*
@@ -312,9 +312,27 @@ void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
     config.end();                          // Fecha o Preferences após a gravação
 }
 
-void SHtools_ESP32_OTA_AP::SerialHandle(uint8_t *data, size_t len)
+// Implementação de função para imprimir as informações em tela
+void SHtools_ESP32_OTA_AP::printMSG(const String &msg)
 {
-    /*
+    if (SerialCMD(msg))
+    {
+        return;
+    }
+
+    if (ServerMode)
+    {
+        WebSerial.println(msg); // Envia a mensagem para o WebSerial
+    }
+    else
+    {
+        Serial.println(msg); // Envia a mensagem para o Serial Monitor
+    }
+}
+
+void SHtools_ESP32_OTA_AP::WebserialCallback(uint8_t *data, size_t len)
+{
+
     String msg = "";
 
     // Converte os dados recebidos para uma string
@@ -323,11 +341,46 @@ void SHtools_ESP32_OTA_AP::SerialHandle(uint8_t *data, size_t len)
         msg += char(data[i]);
     }
 
+    if (SerialCMD(msg))
+    {
+        return;
+    }
+
+    /*
+        // Verifica se a mensagem recebida é um comando (case insensitive)
+        if (msg.substring(0, 4).equalsIgnoreCase("cmd:"))
+        {
+            // Extrair o comando após "cmd:"
+            String cmd = msg.substring(4); // Remove "cmd:" e obtém o comando
+
+            // Verificar qual comando foi enviado (case insensitive)
+            if (cmd.equalsIgnoreCase("DebugInicial"))
+            {
+                // Alterna o valor de DebugInicial
+                DebugInicial = !DebugInicial;
+                set_DebugInicial(DebugInicial); // Grava a mudança via set_DebugInicial()
+
+                // Reinicia o ESP32 após alterar o valor
+                delay(1000);
+                ESP.restart();
+            }
+        }
+        else
+        {
+            // Espelha a mensagem recebida no Serial Monitor
+            // Serial.println(msg);
+            WebSerial.println(msg);
+        }
+        */
+}
+
+bool SHtools_ESP32_OTA_AP::SerialCMD(String _msg)
+{
     // Verifica se a mensagem recebida é um comando (case insensitive)
-    if (msg.substring(0, 4).equalsIgnoreCase("cmd:"))
+    if (_msg.substring(0, 4).equalsIgnoreCase("cmd:"))
     {
         // Extrair o comando após "cmd:"
-        String cmd = msg.substring(4); // Remove "cmd:" e obtém o comando
+        String cmd = _msg.substring(4); // Remove "cmd:" e obtém o comando
 
         // Verificar qual comando foi enviado (case insensitive)
         if (cmd.equalsIgnoreCase("DebugInicial"))
@@ -339,13 +392,15 @@ void SHtools_ESP32_OTA_AP::SerialHandle(uint8_t *data, size_t len)
             // Reinicia o ESP32 após alterar o valor
             delay(1000);
             ESP.restart();
+            while (true)
+            {
+            };
         }
+
+        return true;
     }
     else
     {
-        // Espelha a mensagem recebida no Serial Monitor
-        // Serial.println(msg);
-        WebSerial.println(msg);
+        return false;
     }
-    */
 }
