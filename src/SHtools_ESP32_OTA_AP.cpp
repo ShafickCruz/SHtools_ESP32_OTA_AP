@@ -124,9 +124,15 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
     }
 
     Serial.println("teste nervoso");
-    delay(100);
+    delay(100); // Pequeno atraso para garantir que os dados estejam disponíveis
 
-    // Desvia o conteúde de Serial para Webserial
+    // Espera até que os dados estejam disponíveis na porta serial
+    while (!Serial.available())
+    {
+        delay(10); // Pequeno atraso para evitar um loop ocupado
+    }
+
+    // Desvia o conteúdo de Serial para Webserial
     if (Serial.available())
     {
         String conteudoSerial = "";
