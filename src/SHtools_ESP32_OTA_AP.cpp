@@ -111,6 +111,10 @@ void SHtools_ESP32_OTA_AP::handle()
 
 void SHtools_ESP32_OTA_AP::ServerMode_handle()
 {
+    // processa as requisições Webserial e OTA
+    ElegantOTA.loop();
+    WebSerial.loop();
+
     unsigned long cTime = millis();
 
     /*
@@ -122,46 +126,6 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
         set_DebugInicial(false); // Desativa DebugInicial
         ESP.restart();           // Reinicia o ESP32
     }
-
-    /*
-        Serial.println("teste nervoso");
-        delay(100); // Pequeno atraso para garantir que os dados estejam disponíveis
-
-        // Espera até que os dados estejam disponíveis na porta serial
-        while (!Serial.available())
-        {
-            delay(10); // Pequeno atraso para evitar um loop ocupado
-        }
-
-        // Desvia o conteúdo de Serial para Webserial
-        if (Serial.available())
-        {
-            String conteudoSerial = "";
-            while (Serial.available())
-            {
-                char c = Serial.read(); // Lê um byte por vez
-                conteudoSerial += c;    // Acumula o conteúdo na String
-            }
-
-            conteudoSerial += "***";
-
-            WebSerial.println(conteudoSerial); // Exibe o conteúdo lido na WebSerial
-        }
-
-        static unsigned long aaa = millis();
-
-        if ((unsigned long)millis() - aaa > 3000)
-        {
-            Serial.print("lib: ");
-            WebSerial.print("lib: ");
-            Serial.println(millis());
-            WebSerial.println(millis());
-            aaa = millis();
-        }
-    */
-    // processa as requisições Webserial e OTA
-    ElegantOTA.loop();
-    WebSerial.loop();
 
     // Faz o LED piscar continuamente
     static unsigned long lastBlinkTime = 0;
