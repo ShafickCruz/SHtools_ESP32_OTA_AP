@@ -95,17 +95,6 @@ void SHtools_ESP32_OTA_AP::handle()
     if (ServerMode)
     {
         ServerMode_handle();
-
-        /*
-        Se está em modo servidor há mais de 30 minutos,
-        desativa o modo DebugInicial e reinicia o esp para sair do modo servidor
-        */
-        unsigned long cTime = millis();
-        if ((cTime - ServerModeInicio) >= 1800000) // 30 minutos
-        {
-            set_DebugInicial(false); // Desativa DebugInicial
-            ESP.restart();           // Reinicia o ESP32
-        }
     }
     else
     {
@@ -122,15 +111,27 @@ void SHtools_ESP32_OTA_AP::handle()
 
 void SHtools_ESP32_OTA_AP::ServerMode_handle()
 {
-    ElegantOTA.loop(); // processa as requisições OTA
-    WebSerial.loop();  // processa as requisições Webserial
+    /*
+    Se está em modo servidor há mais de 30 minutos,
+    desativa o modo DebugInicial e reinicia o esp para sair do modo servidor
+    */
+    unsigned long cTime = millis();
+    if ((cTime - ServerModeInicio) >= 1800000) // 30 minutos
+    {
+        set_DebugInicial(false); // Desativa DebugInicial
+        ESP.restart();           // Reinicia o ESP32
+    }
 
-    if (Serial.available()) // monitora Serial Monitor
-        SerialHandle(nullptr, 0, true);
+    // Desvia o conteúde de Serial para Webserial
+    if (Serial.available())
+        WebSerial.println(Serial.readString());
 
-    unsigned long cTime = millis(); // Captura o tempo atual
+    // processa as requisições Webserial e OTA
+    ElegantOTA.loop();
+    WebSerial.loop();
 
     // Faz o LED piscar continuamente
+    unsigned long cTime = millis(); // Captura o tempo atual
     static unsigned long lastBlinkTime = 0;
     unsigned long blinkInterval = 150; // Piscar a cada 250ms
     cTime = millis();
@@ -324,61 +325,38 @@ void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
     config.end();                          // Fecha o Preferences após a gravação
 }
 
-void SHtools_ESP32_OTA_AP::SerialHandle(uint8_t *data, size_t len, bool serialFisica)
+void SHtools_ESP32_OTA_AP::SerialHandle(uint8_t *data, size_t len)
 {
-
-    /*
-    Caractere nulo (\0)
-    Caractere de início de texto (\x02)
-    Ambos são caracteres de controle que não aparecem visivelmente no console,
-    mas podem ser lidos e interpretados no código.
-    */
-
     String msg = "";
 
-    if (serialFisica)
+    // Converte os dados recebidos para uma string
+    for (size_t i = 0; i < len; i++)
     {
-        msg = Serial.readStringUntil('\n'); // Lê a mensagem completa até '\n'
-
-        // Verifica se a mensagem já está marcada com o caractere de controle
-        if (!msg.endsWith(String('\x02')))
-        {
-            // Marca a mensagem concatenando o caractere de controle
-            msg += '\x02';
-
-            Serial.println(msg);    // Exibe no Serial Monitor
-            WebSerial.println(msg); // Espelha para o WebSerial
-        }
+        msg += char(data[i]);
     }
 
-    // Converte os dados recebidos para uma string
-    // for (size_t i = 0; i < len; i++)
-    //{
-    //  msg += char(data[i]);
-    //}
+    // Verifica se a mensagem recebida é um comando (case insensitive)
+    if (msg.substring(0, 4).equalsIgnoreCase("cmd:"))
+    {
+        // Extrair o comando após "cmd:"
+        String cmd = msg.substring(4); // Remove "cmd:" e obtém o comando
 
-    // Espelha a mensagem recebida no Serial Monitor
-    // Serial.println(msg);
-    // WebSerial.println(msg);
-
-    /*
-        // Verifica se a mensagem recebida é um comando (case insensitive)
-        if (msg.substring(0, 4).equalsIgnoreCase("cmd:"))
+        // Verificar qual comando foi enviado (case insensitive)
+        if (cmd.equalsIgnoreCase("DebugInicial"))
         {
-            // Extrair o comando após "cmd:"
-            String cmd = msg.substring(4); // Remove "cmd:" e obtém o comando
+            // Alterna o valor de DebugInicial
+            DebugInicial = !DebugInicial;
+            set_DebugInicial(DebugInicial); // Grava a mudança via set_DebugInicial()
 
-            // Verificar qual comando foi enviado (case insensitive)
-            if (cmd.equalsIgnoreCase("DebugInicial"))
-            {
-                // Alterna o valor de DebugInicial
-                DebugInicial = !DebugInicial;
-                set_DebugInicial(DebugInicial); // Grava a mudança via set_DebugInicial()
-
-                // Reinicia o ESP32 após alterar o valor
-                delay(1000);
-                ESP.restart();
-            }
+            // Reinicia o ESP32 após alterar o valor
+            delay(1000);
+            ESP.restart();
         }
-        */
+    }
+    else
+    {
+        // Espelha a mensagem recebida no Serial Monitor
+        // Serial.println(msg);
+        WebSerial.println(msg);
+    }
 }

@@ -24,7 +24,7 @@ public:
     void set_DebugInicial(bool valor);
 
     // Processa mensagens recebidas via WebSerial
-    void SerialHandle(uint8_t *data = nullptr, size_t len = 0, bool serialFisica = false);
+    void SerialHandle(uint8_t *data, size_t len);
 
 private:
     bool ServerMode;
