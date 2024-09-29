@@ -147,7 +147,9 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
     if ((unsigned long)millis() - aaa > 3000)
     {
         Serial.print("lib: ");
+        WebSerial.print("lib: ");
         Serial.println(millis());
+        WebSerial.println(millis());
         aaa = millis();
     }
 }
