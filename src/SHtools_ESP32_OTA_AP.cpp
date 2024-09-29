@@ -126,9 +126,14 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
     // Desvia o conteúde de Serial para Webserial
     if (Serial.available())
     {
-        WebSerial.println("++++++++++++++++");
-        WebSerial.println(Serial.readString());
-        WebSerial.println("----------------");
+        String conteudoSerial = "";
+        while (Serial.available())
+        {
+            char c = Serial.read(); // Lê um byte por vez
+            conteudoSerial += c;    // Acumula o conteúdo na String
+        }
+
+        WebSerial.println(conteudoSerial); // Exibe o conteúdo lido na WebSerial
     }
 
     // processa as requisições Webserial e OTA
@@ -146,16 +151,18 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
         lastBlinkTime = cTime;
     }
 
-    static unsigned long aaa = millis();
+    /*
+        static unsigned long aaa = millis();
 
-    if ((unsigned long)millis() - aaa > 3000)
-    {
-        Serial.print("lib: ");
-        WebSerial.print("lib: ");
-        Serial.println(millis());
-        WebSerial.println(millis());
-        aaa = millis();
-    }
+        if ((unsigned long)millis() - aaa > 3000)
+        {
+            Serial.print("lib: ");
+            WebSerial.print("lib: ");
+            Serial.println(millis());
+            WebSerial.println(millis());
+            aaa = millis();
+        }
+        */
 }
 
 void SHtools_ESP32_OTA_AP::bt_handle()
