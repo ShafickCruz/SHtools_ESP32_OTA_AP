@@ -133,7 +133,20 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
             conteudoSerial += c;    // Acumula o conteúdo na String
         }
 
+        conteudoSerial += "****";
+
         WebSerial.println(conteudoSerial); // Exibe o conteúdo lido na WebSerial
+    }
+
+    static unsigned long aaa = millis();
+
+    if ((unsigned long)millis() - aaa > 3000)
+    {
+        Serial.print("lib: ");
+        WebSerial.print("lib: ");
+        Serial.println(millis());
+        WebSerial.println(millis());
+        aaa = millis();
     }
 
     // processa as requisições Webserial e OTA
@@ -150,19 +163,6 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
         digitalWrite(ledPin, !digitalRead(ledPin)); // Inverte o estado do LED
         lastBlinkTime = cTime;
     }
-
-    /*
-        static unsigned long aaa = millis();
-
-        if ((unsigned long)millis() - aaa > 3000)
-        {
-            Serial.print("lib: ");
-            WebSerial.print("lib: ");
-            Serial.println(millis());
-            WebSerial.println(millis());
-            aaa = millis();
-        }
-        */
 }
 
 void SHtools_ESP32_OTA_AP::bt_handle()
