@@ -376,6 +376,9 @@ void SHtools_ESP32_OTA_AP::WebserialCallback(uint8_t *data, size_t len)
 
 bool SHtools_ESP32_OTA_AP::SerialCMD(String _msg)
 {
+
+    WebSerial.println(_msg);
+
     // Verifica se a mensagem recebida é um comando (case insensitive)
     if (_msg.substring(0, 4).equalsIgnoreCase("cmd:"))
     {
