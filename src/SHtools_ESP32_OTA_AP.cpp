@@ -324,7 +324,7 @@ void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
     config.end();                          // Fecha o Preferences após a gravação
 }
 
-void SHtools_ESP32_OTA_AP::SerialHandle(uint8_t *data = nullptr, size_t len = 0, bool serialFisica = false)
+void SHtools_ESP32_OTA_AP::SerialHandle(uint8_t *data, size_t len, bool serialFisica)
 {
 
     /*
