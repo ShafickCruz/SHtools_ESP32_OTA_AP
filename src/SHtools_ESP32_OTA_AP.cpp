@@ -133,7 +133,7 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
             conteudoSerial += c;    // Acumula o conteúdo na String
         }
 
-        conteudoSerial += "****";
+        conteudoSerial += "***";
 
         WebSerial.println(conteudoSerial); // Exibe o conteúdo lido na WebSerial
     }
