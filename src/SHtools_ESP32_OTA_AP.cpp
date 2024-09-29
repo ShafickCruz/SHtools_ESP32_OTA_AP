@@ -111,11 +111,12 @@ void SHtools_ESP32_OTA_AP::handle()
 
 void SHtools_ESP32_OTA_AP::ServerMode_handle()
 {
+    unsigned long cTime = millis();
+
     /*
     Se está em modo servidor há mais de 30 minutos,
     desativa o modo DebugInicial e reinicia o esp para sair do modo servidor
     */
-    unsigned long cTime = millis();
     if ((cTime - ServerModeInicio) >= 1800000) // 30 minutos
     {
         set_DebugInicial(false); // Desativa DebugInicial
@@ -131,7 +132,6 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
     WebSerial.loop();
 
     // Faz o LED piscar continuamente
-    unsigned long cTime = millis(); // Captura o tempo atual
     static unsigned long lastBlinkTime = 0;
     unsigned long blinkInterval = 150; // Piscar a cada 250ms
     cTime = millis();
