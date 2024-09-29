@@ -50,11 +50,11 @@ void SHtools_ESP32_OTA_AP::begin()
     pinMode(buttonPin, INPUT_PULLUP);
 
     // se a serial não foi iniciada pelo cliente, inicia a serial
-    // if (!Serial)
-    //{
-    Serial.begin(115200);
-    // delay(1000);
-    //}
+    if (Serial.baudRate() == 0) // se não inciou, o baudrate é zero
+    {
+        Serial.begin(115200);
+        delay(1000);
+    }
 
     // desconecta WiFi e webserver se estiver conectado,
     // porque WebSerial pode iniciar o wifi/server internamente na criação da instância.
@@ -125,6 +125,9 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
     ElegantOTA.loop(); // processa as requisições OTA
     WebSerial.loop();  // processa as requisições Webserial
 
+    if (Serial.available()) // monitora Serial Monitor
+        SerialHandle(nullptr, 0, true);
+
     unsigned long cTime = millis(); // Captura o tempo atual
 
     // Faz o LED piscar continuamente
@@ -145,11 +148,6 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
         Serial.print("lib: ");
         Serial.println(millis());
         aaa = millis();
-    }
-
-    if (Serial.available())
-    {
-        WebSerial.print(Serial.read());
     }
 }
 
@@ -192,9 +190,9 @@ void SHtools_ESP32_OTA_AP::startServerMode()
     Serial.println("Entrando em modo Servidor...");
 
     WifiSetup();               // configura e inicializa o servidor wifi
-    rotasEcallbacks();         // define rotas e callbacks
     ElegantOTA.begin(&server); // Start ElegantOTA
     WebSerial.begin(&server);  // Start Webserial
+    rotasEcallbacks();         // define rotas e callbacks
     server.begin();            // Start webserver
 
     Serial.println("Servidor iniciado");
@@ -218,21 +216,23 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
                      { this->onOTAEnd(success); });
 
     // Callback para incoming messages do webserial
-    // WebSerial.onMessage([this](uint8_t *data, size_t len)
-    //                    { this->ComandoWebSerial(data, len); });
+    WebSerial.onMessage([this](uint8_t *data, size_t len)
+                        { this->SerialHandle(data, len); });
 
     /* Attach Message Callback */
-    WebSerial.onMessage([&](uint8_t *data, size_t len)
-                        {
-    Serial.printf("Received %lu bytes from WebSerial: ", len);
-    Serial.write(data, len);
-    Serial.println();
-    WebSerial.println("Received Data...");
-    String d = "";
-    for(size_t i=0; i < len; i++){
-      d += char(data[i]);
-    }
-    WebSerial.println(d); });
+    /*
+        WebSerial.onMessage([&](uint8_t *data, size_t len)
+                            {
+        Serial.printf("Received %lu bytes from WebSerial: ", len);
+        Serial.write(data, len);
+        Serial.println();
+        WebSerial.println("Received Data...");
+        String d = "";
+        for(size_t i=0; i < len; i++){
+          d += char(data[i]);
+        }
+        WebSerial.println(d); });
+        */
 }
 
 void SHtools_ESP32_OTA_AP::WifiSetup()
@@ -324,69 +324,61 @@ void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
     config.end();                          // Fecha o Preferences após a gravação
 }
 
-void SHtools_ESP32_OTA_AP::ComandoWebSerial(uint8_t *data, size_t len)
+void SHtools_ESP32_OTA_AP::SerialHandle(uint8_t *data = nullptr, size_t len = 0, bool serialFisica = false)
 {
 
     /*
-        Serial.printf("Received %u bytes from WebSerial: ", len);
-        Serial.write(data, len);
-        Serial.println();
-        WebSerial.println("Received Data...");
-        String d = "";
-        for (size_t i = 0; i < len; i++)
-        {
-            d += char(data[i]);
-        }
-        WebSerial.println(d);
-
+    Caractere nulo (\0)
+    Caractere de início de texto (\x02)
+    Ambos são caracteres de controle que não aparecem visivelmente no console,
+    mas podem ser lidos e interpretados no código.
     */
 
-    /*
-    String msgRecebida = "";
+    String msg = "";
+
+    if (serialFisica)
+    {
+        msg = Serial.readStringUntil('\n'); // Lê a mensagem completa até '\n'
+
+        // Verifica se a mensagem já está marcada com o caractere de controle
+        if (!msg.endsWith(String('\x02')))
+        {
+            // Marca a mensagem concatenando o caractere de controle
+            msg += '\x02';
+
+            Serial.println(msg);    // Exibe no Serial Monitor
+            WebSerial.println(msg); // Espelha para o WebSerial
+        }
+    }
 
     // Converte os dados recebidos para uma string
-    for (size_t i = 0; i < len; i++)
-    {
-        msgRecebida += char(data[i]);
-    }
+    // for (size_t i = 0; i < len; i++)
+    //{
+    //  msg += char(data[i]);
+    //}
 
     // Espelha a mensagem recebida no Serial Monitor
-    Serial.println(msgRecebida);
+    // Serial.println(msg);
+    // WebSerial.println(msg);
 
-    // Verifica se a mensagem recebida é um comando (case insensitive)
-    if (msgRecebida.substring(0, 4).equalsIgnoreCase("cmd:"))
-    {
-        // Extrair o comando após "cmd:"
-        String comando = msgRecebida.substring(4); // Remove "cmd:" e obtém o comando
-
-        // Verificar qual comando foi enviado (case insensitive)
-        if (comando.equalsIgnoreCase("DebugInicial"))
+    /*
+        // Verifica se a mensagem recebida é um comando (case insensitive)
+        if (msg.substring(0, 4).equalsIgnoreCase("cmd:"))
         {
-            // Alterna o valor de DebugInicial
-            DebugInicial = !DebugInicial;
-            set_DebugInicial(DebugInicial); // Grava a mudança via set_DebugInicial()
+            // Extrair o comando após "cmd:"
+            String cmd = msg.substring(4); // Remove "cmd:" e obtém o comando
 
-            // Espelha no WebSerial
-            // if (get_ServerMode()) {
-            //    WebSerial.println("DebugInicial toggled.");
-            //}
+            // Verificar qual comando foi enviado (case insensitive)
+            if (cmd.equalsIgnoreCase("DebugInicial"))
+            {
+                // Alterna o valor de DebugInicial
+                DebugInicial = !DebugInicial;
+                set_DebugInicial(DebugInicial); // Grava a mudança via set_DebugInicial()
 
-            // Reinicia o ESP32 após alterar o valor
-            delay(1000);
-            ESP.restart();
+                // Reinicia o ESP32 após alterar o valor
+                delay(1000);
+                ESP.restart();
+            }
         }
-        else
-        {
-            // Comando desconhecido
-            // if (get_ServerMode()) {
-            //    WebSerial.println("Comando desconhecido.");
-            //}
-        }
-    }
-
-    // Espelha a mensagem no WebSerial se estiver ativo
-    // if (get_ServerMode()) {
-    WebSerial.println(msgRecebida);
-    //}
-    */
+        */
 }
