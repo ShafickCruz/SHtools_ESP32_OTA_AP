@@ -123,41 +123,42 @@ void SHtools_ESP32_OTA_AP::ServerMode_handle()
         ESP.restart();           // Reinicia o ESP32
     }
 
-    Serial.println("teste nervoso");
-    delay(100); // Pequeno atraso para garantir que os dados estejam disponíveis
+    /*
+        Serial.println("teste nervoso");
+        delay(100); // Pequeno atraso para garantir que os dados estejam disponíveis
 
-    // Espera até que os dados estejam disponíveis na porta serial
-    while (!Serial.available())
-    {
-        delay(10); // Pequeno atraso para evitar um loop ocupado
-    }
-
-    // Desvia o conteúdo de Serial para Webserial
-    if (Serial.available())
-    {
-        String conteudoSerial = "";
-        while (Serial.available())
+        // Espera até que os dados estejam disponíveis na porta serial
+        while (!Serial.available())
         {
-            char c = Serial.read(); // Lê um byte por vez
-            conteudoSerial += c;    // Acumula o conteúdo na String
+            delay(10); // Pequeno atraso para evitar um loop ocupado
         }
 
-        conteudoSerial += "***";
+        // Desvia o conteúdo de Serial para Webserial
+        if (Serial.available())
+        {
+            String conteudoSerial = "";
+            while (Serial.available())
+            {
+                char c = Serial.read(); // Lê um byte por vez
+                conteudoSerial += c;    // Acumula o conteúdo na String
+            }
 
-        WebSerial.println(conteudoSerial); // Exibe o conteúdo lido na WebSerial
-    }
+            conteudoSerial += "***";
 
-    static unsigned long aaa = millis();
+            WebSerial.println(conteudoSerial); // Exibe o conteúdo lido na WebSerial
+        }
 
-    if ((unsigned long)millis() - aaa > 3000)
-    {
-        Serial.print("lib: ");
-        WebSerial.print("lib: ");
-        Serial.println(millis());
-        WebSerial.println(millis());
-        aaa = millis();
-    }
+        static unsigned long aaa = millis();
 
+        if ((unsigned long)millis() - aaa > 3000)
+        {
+            Serial.print("lib: ");
+            WebSerial.print("lib: ");
+            Serial.println(millis());
+            WebSerial.println(millis());
+            aaa = millis();
+        }
+    */
     // processa as requisições Webserial e OTA
     ElegantOTA.loop();
     WebSerial.loop();
