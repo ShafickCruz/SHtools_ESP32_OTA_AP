@@ -24,7 +24,6 @@
     "website": "https://github.com/ShafickCruz/SHtools_ESP32_OTA_AP",
     "issues": "https://github.com/ShafickCruz/SHtools_ESP32_OTA_AP/issues",
     "dependencies": {
-        "ayushsharma82/ElegantOTA": "^3.1.5",
-        "ayushsharma82/WebSerial": "^2.0.7"
+        "ayushsharma82/ElegantOTA": "^3.1.5"        
     }
 }
