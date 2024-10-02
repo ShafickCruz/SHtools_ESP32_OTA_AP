@@ -1,0 +1,157 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.navbar {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar div:first-child {
+    font-size: 1.5em; /* Título maior */
+}
+
+.navbar-buttons {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-buttons input[type="radio"] + label {
+    margin-right: 5px; /* Espaço entre radio button e caption */
+}
+
+.navbar-buttons button:nth-child(4) {
+    margin-left: 10px; /* Espaço entre radio button e botão Clear */
+    margin-right: 15px; /* Espaço entre botão Clear e Export */
+}
+
+.main-content {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.log-header {
+    text-align: center;
+    background-color: #e0e0e0;
+    padding: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.log-entry {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    padding: 5px 0;
+}
+
+.log-entry .line-number {
+    background-color: #ddd;
+    padding: 2px 5px;
+    margin-right: 10px;
+    color: #555;
+}
+
+.footer {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+    justify-content: space-between;
+}
+
+.footer input {
+    flex: 1;
+    padding: 5px;
+}
+
+.footer button {
+    padding: 5px 10px;
+    margin-right: 15px; /* Espaço entre botão Send e checkbox */
+}
+
+.auto-scroll-container {
+    display: flex;
+    align-items: center;
+}
+
+.auto-scroll-container label {
+    margin-left: 5px;
+}
+
+.toggle-button {
+    background-color: #555;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    margin-left: 10px;
+    transition: background-color 0.3s;
+}
+
+.toggle-button.active {
+    background-color: #2196F3;
+}
+
+.toggle-button:hover {
+    background-color: #777;
+}
+
+.dark-theme {
+    background-color: #333;
+    color: white;
+}
+
+.dark-theme .navbar {
+    background-color: #555;
+}
+
+.dark-theme .main-content {
+    background-color: #444;
+    border-color: #666;
+}
+
+.dark-theme .log-header {
+    background-color: #666;
+    color: white;
+}
+
+.dark-theme .log-entry {
+    border-color: #666;
+}
+
+.dark-theme .log-entry .line-number {
+    background-color: #777;
+    color: white;
+}
+
+.dark-theme .footer {
+    border-color: #666;
+}
+
+.dark-theme .footer input {
+    background-color: #555;
+    color: white;
+}
+
+.dark-theme .footer button {
+    background-color: #777;
+}
+
+.dark-theme .footer button:hover {
+    background-color: #999;
+}

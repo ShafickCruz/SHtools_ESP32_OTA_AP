@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SHtools</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="navbar">
+      <div>SHtools</div>
+      <div class="navbar-buttons">
+        <label for="themeDark">Tema:</label>
+        <input type="radio" id="themeDark" name="theme" value="dark" /> Dark
+        <input
+          type="radio"
+          id="themeLight"
+          name="theme"
+          value="light"
+          checked
+        />
+        Light
+        <button onclick="clearLogs()">Limpar</button>
+        <button onclick="exportLogs()">Exportar</button>
+      </div>
+    </div>
+    <div class="main-content" id="log">
+      <div class="log-header" id="logHeader">
+        <!-- O cabeçalho será atualizado pelo JavaScript -->
+      </div>
+    </div>
+    <div class="footer">
+      <input type="text" id="command" placeholder="Digite aqui o comando" />
+      <button onclick="sendCommand()">Enviar</button>
+      <div class="auto-scroll-container">
+        <input type="checkbox" id="autoScrollToggle" />
+        <label for="autoScrollToggle">Auto Scroll</label>
+      </div>
+    </div>
+
+    <script>
+      let logCount = 1;
+      const logEntries = [];
+
+      const logHeaderText = "Início da captura dos Logs"; // Texto do cabeçalho
+
+      // Função para obter IP e millis com valores padrão
+      function getNetworkInfo() {
+        let ip = "000.000.000.0000"; // Valor padrão para IP
+        let millisTime = 0; // Valor padrão para millis
+
+        // Verifique se estamos em um ambiente de desenvolvimento (navegador)
+        if (typeof WiFi === "undefined" || typeof millis === "undefined") {
+          console.warn("Executando no navegador, usando valores simulados.");
+        } else {
+          // Tentar obter IP e millis se estiver no ambiente do ESP32
+          try {
+            ip = WiFi.localIP(); // Obter IP local
+          } catch (error) {
+            console.warn("Não foi possível obter o IP:", error);
+          }
+
+          try {
+            millisTime = millis(); // Obter millis
+          } catch (error) {
+            console.warn("Não foi possível obter millis:", error);
+          }
+        }
+
+        return { ip, millisTime }; // Retorna um objeto com as informações
+      }
+
+      // Atualizar o cabeçalho com o IP local e millis()
+      function updateLogHeader() {
+        const { ip, millisTime } = getNetworkInfo(); // Obtém IP e millis
+        const logHeader = document.getElementById("logHeader");
+        logHeader.innerHTML = `${logHeaderText} | IP: <span id="localIP">${ip}</span> | millis: <span id="millisTime">${millisTime}</span> ms`; // Atualiza o cabeçalho
+      }
+
+      // Limpa o conteúdo do log e atualiza o cabeçalho
+      function clearLogs() {
+        const log = document.getElementById("log");
+        logEntries.length = 0; // Limpa as entradas de log
+        logCount = 1; // Reseta o contador de logs
+        updateLogHeader(); // Atualiza o cabeçalho
+      }
+
+      function addLogMessage(message, isCommand = false) {
+        const log = document.getElementById("log");
+        const logEntry = document.createElement("div");
+        logEntry.className = "log-entry";
+        const currentTime = new Date().toLocaleTimeString();
+        const logText = `${logCount} (${currentTime}): ${message}`;
+        logEntry.innerHTML = `<span class="line-number">${logCount} (${currentTime}):</span> <span>${message}</span>`;
+        if (isCommand) {
+          logEntry.style.color = "green";
+          logEntry.style.fontWeight = "bold";
+          logEntry.innerHTML = `<span class="line-number" style="color: green; font-weight: bold;">${logCount} (${currentTime}):</span> <span>${message}</span>`;
+        }
+        log.insertBefore(logEntry, log.firstChild);
+        logEntries.push(logText);
+        if (document.getElementById("autoScrollToggle").checked) {
+          log.scrollTop = log.scrollHeight;
+        }
+        logCount++;
+      }
+
+      function sendCommand() {
+        const commandInput = document.getElementById("command");
+        const message = commandInput.value;
+        if (message) {
+          addLogMessage(message, true);
+          commandInput.value = "";
+        }
+      }
+
+      // Adiciona um evento keypress para enviar comando ao pressionar ENTER
+      document
+        .getElementById("command")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") {
+            sendCommand();
+            event.preventDefault(); // Evita que o formulário seja enviado, se houver um
+          }
+        });
+
+      function exportLogs() {
+        const header = document.querySelector(".log-header").innerText;
+        const logText = [header, ...logEntries].join("\n"); // Remover o reverse() para manter a ordem correta
+        const blob = new Blob([logText], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "logs.txt";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      document.querySelectorAll('input[name="theme"]').forEach((elem) => {
+        elem.addEventListener("change", function (event) {
+          if (event.target.value === "dark") {
+            document.body.classList.add("dark-theme");
+          } else {
+            document.body.classList.remove("dark-theme");
+          }
+        });
+      });
+
+      document
+        .getElementById("autoScrollToggle")
+        .addEventListener("change", (event) => {
+          if (event.target.checked) {
+            event.target.classList.add("active");
+          } else {
+            event.target.classList.remove("active");
+          }
+        });
+
+      // Chamada para atualizar o cabeçalho ao carregar a página
+      document.addEventListener("DOMContentLoaded", (event) => {
+        updateLogHeader(); // Atualiza o cabeçalho na inicialização
+      });
+
+      // Simular mensagens recebidas
+      setInterval(() => {
+        addLogMessage(`Simulated message ${logCount}`);
+      }, 3000);
+    </script>
+  </body>
+</html>

@@ -5,8 +5,8 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <AsyncTCP.h>
+#include <AsyncWebSocket.h>
 #include <ElegantOTA.h>
-#include <WebSerial.h>
 #include <pgmspace.h>    // para utilizar PROGMEM - memoria flash
 #include <Preferences.h> // memoria flash
 
@@ -22,6 +22,9 @@ public:
 
     // Setter para DebugInicial
     void set_DebugInicial(bool valor);
+
+    // Métodos para WebSocket
+    void WebSocket_sendMessage(const String &message); // Método para enviar mensagens via WebSocket
 
     void printMSG(const String &msg);
 
@@ -40,6 +43,7 @@ private:
     bool DebugInicial;
     unsigned long ota_progress_millis;
     AsyncWebServer server; // Declaração do servidor como membro da classe
+    AsyncWebSocket ws;     // Declaração do WebSocket como membro da classe
 
     Preferences config;                    // instancia para configrações usando preferences
     static const char IndexHTML[] PROGMEM; // Declaração da página HTML

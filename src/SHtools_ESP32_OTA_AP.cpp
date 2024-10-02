@@ -41,7 +41,7 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
 SHtools_ESP32_OTA_AP::SHtools_ESP32_OTA_AP(int ledPin, int buttonPin, String nomeSketch)
     : ServerMode(false), ServerModeInicio(0), buttonPressTime(0), lastButtonStateChangeTime(0), longPressDuration(3000),
       debounceDelay(50), lastButtonState(HIGH), ledPin(ledPin), buttonPin(buttonPin),
-      nomeSketch(nomeSketch), DebugInicial(0), ota_progress_millis(0), server(80) {}
+      nomeSketch(nomeSketch), DebugInicial(0), ota_progress_millis(0), server(80), ws("/sw") {}
 
 void SHtools_ESP32_OTA_AP::begin()
 {
@@ -111,9 +111,8 @@ void SHtools_ESP32_OTA_AP::handle()
 
 void SHtools_ESP32_OTA_AP::ServerMode_handle()
 {
-    // processa as requisições Webserial e OTA
-    ElegantOTA.loop();
-    WebSerial.loop();
+    ElegantOTA.loop();   // processa as requisições Webserial e OTA
+    ws.cleanupClients(); // Processa eventos do WebSocket e mantém o WebSocket ativo e limpa conexões inativas
 
     unsigned long cTime = millis();
 
@@ -179,7 +178,7 @@ void SHtools_ESP32_OTA_AP::startServerMode()
 
     WifiSetup();               // configura e inicializa o servidor wifi
     ElegantOTA.begin(&server); // Start ElegantOTA
-    WebSerial.begin(&server);  // Start Webserial
+    server.addHandler(&ws);    // Inicializa o WebSocket
     rotasEcallbacks();         // define rotas e callbacks
     server.begin();            // Start webserver
 
@@ -203,24 +202,22 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
     ElegantOTA.onEnd([this](bool success)
                      { this->onOTAEnd(success); });
 
-    // Callback para incoming messages do webserial
-    WebSerial.onMessage([this](uint8_t *data, size_t len)
-                        { this->WebserialCallback(data, len); });
-
-    /* Attach Message Callback */
-    /*
-        WebSerial.onMessage([&](uint8_t *data, size_t len)
-                            {
-        Serial.printf("Received %lu bytes from WebSerial: ", len);
-        Serial.write(data, len);
-        Serial.println();
-        WebSerial.println("Received Data...");
-        String d = "";
-        for(size_t i=0; i < len; i++){
-          d += char(data[i]);
-        }
-        WebSerial.println(d); });
-        */
+    ws.onEvent([](AsyncWebSocket *server, AsyncWebSocketClient *client,
+                  AwsEventType type, void *arg, uint8_t *data, size_t len)
+               {
+        switch (type) {
+            case WS_EVT_CONNECT:
+                Serial.println("Novo cliente conectado");
+                break;
+            case WS_EVT_DISCONNECT:
+                Serial.println("Cliente desconectado");
+                break;
+            case WS_EVT_DATA:
+                // Aqui você pode lidar com dados recebidos do cliente, se necessário
+                break;
+            default:
+                break;
+        } });
 }
 
 void SHtools_ESP32_OTA_AP::WifiSetup()
@@ -254,6 +251,12 @@ void SHtools_ESP32_OTA_AP::WifiSetup()
     Serial.println(ssid);
     Serial.print("IP do ESP32: ");
     Serial.println(WiFi.softAPIP());
+}
+
+// Método para enviar mensagens para o cliente
+void SHtools_ESP32_OTA_AP::WebSocket_sendMessage(const String &message)
+{
+    ws.textAll(message); // Envia a mensagem para todos os clientes conectados
 }
 
 void SHtools_ESP32_OTA_AP::onOTAStart()
@@ -312,6 +315,7 @@ void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
     config.end();                          // Fecha o Preferences após a gravação
 }
 
+/*
 // Implementação de função para imprimir as informações em tela
 void SHtools_ESP32_OTA_AP::printMSG(const String &msg)
 {
@@ -329,25 +333,28 @@ void SHtools_ESP32_OTA_AP::printMSG(const String &msg)
         Serial.println(msg); // Envia a mensagem para o Serial Monitor
     }
 }
+*/
 
 void SHtools_ESP32_OTA_AP::WebserialCallback(uint8_t *data, size_t len)
 {
+    /*
+        String msg = "";
 
-    String msg = "";
+        // Converte os dados recebidos para uma string
+        for (size_t i = 0; i < len; i++)
+        {
+            msg += char(data[i]);
+        }
 
-    // Converte os dados recebidos para uma string
-    for (size_t i = 0; i < len; i++)
-    {
-        msg += char(data[i]);
-    }
+        WebSerial.print("---> ");
+        WebSerial.println(msg);
 
-    WebSerial.print("---> ");
-    WebSerial.println(msg);
+        if (SerialCMD(msg))
+        {
+            return;
+        }
 
-    if (SerialCMD(msg))
-    {
-        return;
-    }
+        */
 
     /*
         // Verifica se a mensagem recebida é um comando (case insensitive)
