@@ -159,7 +159,7 @@ void SHtools_ESP32_OTA_AP::bt_handle()
 
 void SHtools_ESP32_OTA_AP::startServerMode()
 {
-    Serial.println("Entrando em modo Servidor...");
+    printMSG("Entrando em modo Servidor...", true);
 
     WifiSetup();               // configura e inicializa o servidor wifi
     ElegantOTA.begin(&server); // Start ElegantOTA
@@ -167,7 +167,7 @@ void SHtools_ESP32_OTA_AP::startServerMode()
     rotasEcallbacks();         // define rotas e callbacks
     server.begin();            // Start webserver
 
-    Serial.println("Servidor iniciado");
+    printMSG("Servidor iniciado", true);
     ServerMode = true;
     ServerModeInicio = millis();
 }
@@ -187,15 +187,15 @@ void SHtools_ESP32_OTA_AP::rotasEcallbacks()
     ElegantOTA.onEnd([this](bool success)
                      { this->onOTAEnd(success); });
 
-    ws.onEvent([](AsyncWebSocket *server, AsyncWebSocketClient *client,
-                  AwsEventType type, void *arg, uint8_t *data, size_t len)
+    ws.onEvent([this](AsyncWebSocket *server, AsyncWebSocketClient *client,
+                      AwsEventType type, void *arg, uint8_t *data, size_t len)
                {
         switch (type) {
             case WS_EVT_CONNECT:
-                Serial.println("Novo cliente conectado");
+                printMSG("Novo cliente conectado", true);
                 break;
             case WS_EVT_DISCONNECT:
-                Serial.println("Cliente desconectado");
+                printMSG("Cliente desconectado", true);
                 break;
             case WS_EVT_DATA:
                 // Aqui você pode lidar com dados recebidos do cliente, se necessário
@@ -221,27 +221,27 @@ void SHtools_ESP32_OTA_AP::WifiSetup()
     String ssid = "192.168.100.100 -> " + generateSSID(); // Gera o SSID com identificador único
 
     // Aguarda a inicialização do servidor wifi
-    Serial.println("inicializando webserver.");
+    printMSG("inicializando webserver.", true);
     while (!WiFi.softAP(ssid.c_str()))
     {
-        Serial.print(".");
+        printMSG(".");
         delay(100);
     }
 
     // aplica as configurações
     WiFi.softAPConfig(local_ip, gateway, local_mask);
 
-    Serial.println("Access Point criado com sucesso.");
-    Serial.print("SSID: ");
-    Serial.println(ssid);
-    Serial.print("IP do ESP32: ");
-    Serial.println(WiFi.softAPIP());
+    printMSG("Access Point criado com sucesso.", true);
+    printMSG("SSID: ");
+    printMSG(ssid, true);
+    printMSG("IP do ESP32: ");
+    printMSG(WiFi.softAPIP().toString(), true);
 }
 
 void SHtools_ESP32_OTA_AP::onOTAStart()
 {
     // Log when OTA has started
-    Serial.println("Update OTA iniciado!");
+    printMSG("Update OTA iniciado!", true);
     // <Add your own code here>
 }
 
@@ -252,7 +252,10 @@ void SHtools_ESP32_OTA_AP::onOTAProgress(size_t current, size_t final)
     if ((cTime - ota_progress_millis) > 1000)
     {
         ota_progress_millis = millis();
-        Serial.printf("OTA Progress Current: %u bytes, Final: %u bytes\n", current, final);
+        // Serial.printf("OTA Progress Current: %u bytes, Final: %u bytes\n", current, final);
+        char buffer[128]; // Define o buffer com tamanho suficiente para a mensagem
+        snprintf(buffer, sizeof(buffer), "OTA Progress Current: %u bytes, Final: %u bytes\n", current, final);
+        printMSG(String(buffer), true); // Chama diretamente o printMSG com a mensagem formatada
     }
 }
 
@@ -261,11 +264,11 @@ void SHtools_ESP32_OTA_AP::onOTAEnd(bool success)
     // Log when OTA has finished
     if (success)
     {
-        Serial.println("Update OTA concluído com sucesso!");
+        printMSG("Update OTA concluído com sucesso!", true);
     }
     else
     {
-        Serial.println("Houve um erro durante o update OTA!");
+        printMSG("Houve um erro durante o update OTA!", true);
     }
     // <Add your own code here>
 }
