@@ -17,16 +17,9 @@ public:
     void begin();  // like setup
     void handle(); // like loop
 
-    // Método getter para ServerMode
-    bool get_ServerMode() const;
-
-    // Setter para DebugInicial
-    void set_DebugInicial(bool valor);
-
-    // Métodos para WebSocket
-    void WebSocket_sendMessage(const String &message); // Método para enviar mensagens via WebSocket
-
-    void printMSG(const String &msg);
+    bool get_ServerMode() const;                            // Método getter para ServerMode
+    void set_DebugInicial(bool valor);                      // Setter para DebugInicial
+    void printMSG(const String &msg, bool newline = false); // Serial Monitor personalizado
 
 private:
     bool ServerMode;
@@ -53,12 +46,12 @@ private:
     void onOTAStart();
     void onOTAProgress(size_t current, size_t final);
     void onOTAEnd(bool success);
-    void WebserialCallback(uint8_t *data, size_t len); // Processa mensagens recebidas via WebSerial
-    void startServerMode();                            // Inicia o servidor AP
+    void startServerMode(); // Inicia o servidor AP
     bool SerialCMD(String _msg);
     void WifiSetup();
     void rotasEcallbacks();
     String generateSSID(); // Gera SSID
+    // void WebSocket_sendMessage(const String &message); // Método para enviar mensagens via WebSocket
 };
 
 #endif

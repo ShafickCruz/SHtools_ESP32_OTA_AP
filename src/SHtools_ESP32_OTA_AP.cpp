@@ -27,7 +27,7 @@ const char SHtools_ESP32_OTA_AP::IndexHTML[] PROGMEM = R"rawliteral(
 <body>
   <h1>SHtools ESP32 UPDATE</h1>
   <a href='javascript:void(0)' class='button' onclick='showAlertAndRedirect()'>Update OTA</a><br>
-  <a href='/webserial' class='button'>Monitor Serial</a><br>
+  <a href='/html/webserial' class='button'>Monitor Serial</a><br>
   <button class='button' onclick="alert('TODO: Info page')">Informações</button>
 
   <footer>
@@ -49,23 +49,8 @@ void SHtools_ESP32_OTA_AP::begin()
     pinMode(ledPin, OUTPUT);
     pinMode(buttonPin, INPUT_PULLUP);
 
-    // se a serial não foi iniciada pelo cliente, inicia a serial
-    if (Serial.baudRate() == 0) // se não inciou, o baudrate é zero
-    {
-        Serial.begin(115200);
-        delay(1000);
-    }
-
-    // desconecta WiFi e webserver se estiver conectado,
-    // porque WebSerial pode iniciar o wifi/server internamente na criação da instância.
-    if (WiFi.status() == WL_CONNECTED)
-    {
-        WiFi.disconnect();
-        delay(2000);
-
-        if (WiFi.status() == WL_DISCONNECTED)
-            server.end();
-    }
+    Serial.begin(115200);
+    delay(1000);
 
     // Iniciar Preferences com o namespace "_config"
     config.begin("_config", false);
@@ -253,11 +238,13 @@ void SHtools_ESP32_OTA_AP::WifiSetup()
     Serial.println(WiFi.softAPIP());
 }
 
+/*
 // Método para enviar mensagens para o cliente
 void SHtools_ESP32_OTA_AP::WebSocket_sendMessage(const String &message)
 {
     ws.textAll(message); // Envia a mensagem para todos os clientes conectados
 }
+*/
 
 void SHtools_ESP32_OTA_AP::onOTAStart()
 {
@@ -315,9 +302,8 @@ void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
     config.end();                          // Fecha o Preferences após a gravação
 }
 
-/*
 // Implementação de função para imprimir as informações em tela
-void SHtools_ESP32_OTA_AP::printMSG(const String &msg)
+void SHtools_ESP32_OTA_AP::printMSG(const String &msg, bool newline = false)
 {
     if (SerialCMD(msg))
     {
@@ -326,62 +312,17 @@ void SHtools_ESP32_OTA_AP::printMSG(const String &msg)
 
     if (ServerMode)
     {
-        WebSerial.println(msg); // Envia a mensagem para o WebSerial
+        ws.textAll(msg); // Enviar para o WebSocket (serial remoto)
+    }
+
+    if (newline)
+    {
+        Serial.println(msg); // Envia com nova linha
     }
     else
     {
-        Serial.println(msg); // Envia a mensagem para o Serial Monitor
+        Serial.print(msg); // Envia sem nova linha
     }
-}
-*/
-
-void SHtools_ESP32_OTA_AP::WebserialCallback(uint8_t *data, size_t len)
-{
-    /*
-        String msg = "";
-
-        // Converte os dados recebidos para uma string
-        for (size_t i = 0; i < len; i++)
-        {
-            msg += char(data[i]);
-        }
-
-        WebSerial.print("---> ");
-        WebSerial.println(msg);
-
-        if (SerialCMD(msg))
-        {
-            return;
-        }
-
-        */
-
-    /*
-        // Verifica se a mensagem recebida é um comando (case insensitive)
-        if (msg.substring(0, 4).equalsIgnoreCase("cmd:"))
-        {
-            // Extrair o comando após "cmd:"
-            String cmd = msg.substring(4); // Remove "cmd:" e obtém o comando
-
-            // Verificar qual comando foi enviado (case insensitive)
-            if (cmd.equalsIgnoreCase("DebugInicial"))
-            {
-                // Alterna o valor de DebugInicial
-                DebugInicial = !DebugInicial;
-                set_DebugInicial(DebugInicial); // Grava a mudança via set_DebugInicial()
-
-                // Reinicia o ESP32 após alterar o valor
-                delay(1000);
-                ESP.restart();
-            }
-        }
-        else
-        {
-            // Espelha a mensagem recebida no Serial Monitor
-            // Serial.println(msg);
-            WebSerial.println(msg);
-        }
-        */
 }
 
 bool SHtools_ESP32_OTA_AP::SerialCMD(String _msg)
