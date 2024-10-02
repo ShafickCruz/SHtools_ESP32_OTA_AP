@@ -51,7 +51,6 @@ private:
     void WifiSetup();
     void rotasEcallbacks();
     String generateSSID(); // Gera SSID
-    // void WebSocket_sendMessage(const String &message); // Método para enviar mensagens via WebSocket
 };
 
 #endif

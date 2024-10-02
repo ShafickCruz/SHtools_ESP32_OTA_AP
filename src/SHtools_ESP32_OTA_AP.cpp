@@ -238,14 +238,6 @@ void SHtools_ESP32_OTA_AP::WifiSetup()
     Serial.println(WiFi.softAPIP());
 }
 
-/*
-// Método para enviar mensagens para o cliente
-void SHtools_ESP32_OTA_AP::WebSocket_sendMessage(const String &message)
-{
-    ws.textAll(message); // Envia a mensagem para todos os clientes conectados
-}
-*/
-
 void SHtools_ESP32_OTA_AP::onOTAStart()
 {
     // Log when OTA has started
@@ -303,7 +295,7 @@ void SHtools_ESP32_OTA_AP::set_DebugInicial(bool valor)
 }
 
 // Implementação de função para imprimir as informações em tela
-void SHtools_ESP32_OTA_AP::printMSG(const String &msg, bool newline = false)
+void SHtools_ESP32_OTA_AP::printMSG(const String &msg, bool newline)
 {
     if (SerialCMD(msg))
     {
